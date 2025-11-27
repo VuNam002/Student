@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Student_management.Data;
-using Student_management.DTOs; // Giả sử bạn có thư mục DTOs
 using Student_management.DTOs.Account;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq; // Cần thiết cho phương thức Select()
-using Microsoft.Extensions.Logging; // Cần thiết cho ILogger
-using Microsoft.Extensions.Configuration; // Cần thiết cho IConfiguration
-using System; // Cần thiết cho Exception
+using System.Linq; 
+using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Configuration; 
+using System; 
 
 namespace Student_management.Services
 {

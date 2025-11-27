@@ -6,11 +6,11 @@ namespace Student_management.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountControllers: ControllerBase
+    public class AccountControllers : ControllerBase
     {
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
         private readonly ILogger<AccountControllers> _logger;
-        public AccountControllers(AccountService accountService, ILogger<AccountControllers> logger)
+        public AccountControllers(IAccountService accountService, ILogger<AccountControllers> logger)
         {
             _accountService = accountService;
             _logger = logger;
@@ -19,7 +19,16 @@ namespace Student_management.Controllers
         [HttpGet]
         public async Task<ActionResult<List<AccountDto>>> GetAll()
         {
-
-        }
+            try
+            {
+                var accounts = await _accountService.GetAll();
+                return Ok(accounts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting all accounts.");
+                return StatusCode(500, "Internal server error");
+            }
+        } 
     }
 }
