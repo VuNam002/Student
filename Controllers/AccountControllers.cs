@@ -1,32 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Student_management.Services;
-using Student_management.DTOs;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Student_management.DTOs.Account;
+using Student_management.Services;
 
 namespace Student_management.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController : ControllerBase
+    public class AccountControllers: ControllerBase
     {
-        private readonly IAccountService _accountService;
-
-        // Inject IAccountService thông qua constructor
-        public AccountController(IAccountService accountService)
+        private readonly AccountService _accountService;
+        private readonly ILogger<AccountControllers> _logger;
+        public AccountControllers(AccountService accountService, ILogger<AccountControllers> logger)
         {
             _accountService = accountService;
+            _logger = logger;
         }
 
-        // Endpoint để lấy tất cả tài khoản
-        // GET: api/account
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Services.AccountDto>>> GetAccounts()
+        public async Task<ActionResult<List<AccountDto>>> GetAll()
         {
-            // Gọi phương thức từ service
-            var accounts = await _accountService.GetAllAccountsAsync();
-            return Ok(accounts);
+
         }
     }
 }
