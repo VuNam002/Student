@@ -3,7 +3,7 @@
     public class AccountDto
     {
         public int ID { get; set; }
-        public string? TenDangNhap { get; set; }
+        public string? Email { get; set; }
         public string? RoleID { get; set; }
         public string? Avatar {  get; set;  }
         public bool TrangThai { get; set; } = true;

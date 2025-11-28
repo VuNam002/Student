@@ -8,5 +8,9 @@ namespace Student_management.Services
     {
         Task<List<AccountDto>> GetAll();
         Task<string?> LoginAsync(LoginRequestDto loginRequest);
+        Task<AccountDto?> Detail(int id);
+        Task<AccountDto> CreateAccount(CreateAccount dto);
+        Task<AccountDto> EditAccount(int id, CreateAccount dto);
+        Task<bool> DeleteAccount(int id);
     }
 }

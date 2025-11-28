@@ -11,9 +11,9 @@ namespace Student_management.Models
         public int AccountID { get; set; }
 
         [Required]
-        [Column("TenDangNhap")]
+        [Column("Email")]
         [StringLength(50)]
-        public string? TenDangNhap { get; set; }
+        public string? Email { get; set; }
 
         [Required]
         [Column("MatKhau")]
