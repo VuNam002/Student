@@ -7,8 +7,8 @@ namespace Student_management.Models
     public class Role
     {
         [Key]
-        [Column("ID")]
-        public int Id { get; set; }
+        [Column("RoleID")]
+        public int RoleID { get; set; }
         [Required]
 
         [Column("MaRole")]

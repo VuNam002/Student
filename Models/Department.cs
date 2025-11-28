@@ -7,8 +7,8 @@ namespace Student_management.Models
     public class Department
     {
         [Key]
-        [Column("ID")]
-        public int ID { get; set; }
+        [Column("DepartmentID")]
+        public int DepartmentID { get; set; }
 
         [Required]
         [Column("TenKhoa")]

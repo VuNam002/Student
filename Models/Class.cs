@@ -7,8 +7,8 @@ namespace Student_management.Models
     public class Class
     {
         [Key]
-        [Column("ID")]
-        public int ID { get; set; }
+        [Column("ClassID")]
+        public int ClassID { get; set; }
 
         [Required]
         [Column("TenLop")]

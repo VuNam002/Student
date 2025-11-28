@@ -7,8 +7,8 @@ namespace Student_management.Models
     public class Account
     {
         [Key]
-        [Column("ID")]
-        public int ID { get; set; }
+        [Column("AccountID")]
+        public int AccountID { get; set; }
 
         [Required]
         [Column("TenDangNhap")]
@@ -30,10 +30,10 @@ namespace Student_management.Models
         [Column("NgayTao")]
         public DateTime NgayTao { get; set; } = DateTime.Now;
 
-        [Column("VaiTroID")]
-        public int VaiTroID { get; set; }
+        [Column("RoleID")]
+        public int RoleID { get; set; }
 
-        [ForeignKey("VaiTroID")]
+        [ForeignKey("RoleID")]
         public Role? Role { get; set; }
 
         public Teacher? Teacher { get; set; }
