@@ -10,10 +10,10 @@ export default function Home() {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
+    } else {
+      router.push("/dashboard");
     }
   }, [router]);
 
-  return (
-      <h1 className="text-2xl">Chào mừng bạn đã đến trang quản lý sinh viên</h1>
-  );
+  return null;
 }

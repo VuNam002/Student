@@ -1,5 +1,7 @@
 "use client";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { cn } from "../app/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,7 @@ import {
   FieldLabel,
 } from "../components/ui/field";
 import { Input } from "@/components/ui/input";
-import { fetchlogin } from "../app/lib/api";
+import { fetchlogin } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 
 export function LoginForm({
@@ -20,31 +22,28 @@ export function LoginForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     try {
       const data = await fetchlogin(email, password);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        setSuccess("Đăng nhập thành công!");
-        setTimeout(() => router.push("/"), 1000);
+        toast.success("Đăng nhập thành công!");
+        setTimeout(() => router.push("/dashboard"), 1000);
       } else {
-        setError(data.message || "Login failed. Please try again.");
+        toast.error(data.message || "Login failed. Please try again.");
       }
     } catch {
-      setError("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-2">
+    <div className="flex w-full h-full flex-col items-center justify-center ">
       <div className={cn("w-full max-w-md", className)} {...props}>
         <Card className="w-full">
+          <ToastContainer />
           <CardContent className="p-8">
             <form onSubmit={handleSubmit}>
               <FieldGroup>
@@ -53,10 +52,6 @@ export function LoginForm({
                   <p className="text-sm text-muted-foreground">
                     Quản lý sinh viên
                   </p>
-                  {success && (
-                    <p className="text-sm text-green-500 mt-2">{success}</p>
-                  )}
-                  {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
                 </div>
 
                 <Field>
