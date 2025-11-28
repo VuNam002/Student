@@ -12,7 +12,8 @@ import {
   FieldLabel,
 } from "../components/ui/field";
 import { Input } from "@/components/ui/input";
-import { fetchlogin } from "@/app/lib/api";
+import { fetchlogin, fetchUserFromToken } from "@/app/lib/api";
+import { useAuth } from "@/app/lib/auth";
 import { useRouter } from "next/navigation";
 
 export function LoginForm({
@@ -20,6 +21,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const auth = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -28,9 +30,24 @@ export function LoginForm({
     try {
       const data = await fetchlogin(email, password);
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        const token = data.token;
+        localStorage.setItem("token", token);
+
+        // Try to load user from token and set auth context so redirects work
+        try {
+          const user = await fetchUserFromToken();
+          if (user) {
+            auth.login(user, token);
+          } else {
+            // Fallback: just navigate to dashboard
+            router.push("/dashboard");
+          }
+        } catch (e) {
+          console.warn('Failed to fetch user from token', e);
+          router.push("/dashboard");
+        }
+
         toast.success("Đăng nhập thành công!");
-        setTimeout(() => router.push("/dashboard"), 1000);
       } else {
         toast.error(data.message || "Login failed. Please try again.");
       }
