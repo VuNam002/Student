@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchAccount, fetchAccountDeleted } from "../../app/lib/api";
+import { fetchAccount, fetchAccountDeleted } from "../../lib/api";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, NotebookPen, Search, X } from "lucide-react";
 
