@@ -150,7 +150,7 @@ namespace Student_management.Controllers
             try
             {
                 var result = await _accountService.DeleteAccount(id);
-                if(!result)
+                if (!result)
                 {
                     return NotFound("Khong tim thay tai khoan de xoa");
                 }
@@ -160,6 +160,26 @@ namespace Student_management.Controllers
             {
                 _logger.LogError(ex, "An error occurred while deleting an account.");
                 return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpGet("paginated")]
+        public async Task<ActionResult<Pagination>> GetAccountPagination([FromQuery] AccountSearch accountSearch)
+        {
+            try
+            {
+                // Xác thực giá trị Page và PageSize
+                if (accountSearch.Page <= 0 || accountSearch.PageSize <= 0)
+                {
+                    return BadRequest("Page và PageSize phải lớn hơn 0.");
+                }
+
+                Pagination paginatedAccounts = await _accountService.GetAccountPagination(accountSearch);
+                return Ok(paginatedAccounts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy danh sách tài khoản phân trang.");
+                return StatusCode(500, "Lỗi máy chủ nội bộ");
             }
         }
     }

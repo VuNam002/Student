@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Student_management.Data;
 using Student_management.DTOs.Account;
 using Student_management.Models;
-using Student_management.Helpers; // Thêm using này
+using Student_management.Helpers; 
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -272,6 +272,63 @@ namespace Student_management.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Loi khi xoa tai khoan ID: {AccountId}", id);
+                throw;
+            }
+        }
+        public async Task<Pagination> GetAccountPagination(AccountSearch searchParams)
+        {
+            try
+            {
+                var query = _context.Accounts.AsNoTracking().Include(a => a.Role).AsQueryable();
+
+                // Lọc theo từ khóa
+                if (!string.IsNullOrWhiteSpace(searchParams.Keyword))
+                {
+                    var keyword = searchParams.Keyword.Trim().ToLower();
+                    query = query.Where(a => a.Email!.ToLower().Contains(keyword) ||
+                                             (a.Role != null && a.Role.TenHienThi!.ToLower().Contains(keyword)));
+                }
+
+                // Lọc theo trạng thái
+                if (searchParams.TrangThai.HasValue)
+                {
+                    query = query.Where(a => a.TrangThai == searchParams.TrangThai.Value);
+                }
+
+                // Tổng số bản ghi
+                var totalCount = await query.CountAsync();
+
+                // Lấy dữ liệu phân trang
+                var accounts = await query
+                    .Skip((searchParams.Page - 1) * searchParams.PageSize)
+                    .Take(searchParams.PageSize)
+                    .Select(a => new AccountDto
+                    {
+                        ID = a.AccountID,
+                        Email = a.Email,
+                        RoleID = a.RoleID.ToString(),
+                        TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
+                        Avatar = a.Avatar,
+                        TrangThai = a.TrangThai,
+                        NgayTao = a.NgayTao
+                    })
+                    .ToListAsync();
+
+                // Tính tổng số trang
+                var totalPages = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
+
+                return new Pagination
+                {
+                    Account = accounts,
+                    TotalCount = totalCount,
+                    Page = searchParams.Page,
+                    PageSize = searchParams.PageSize,
+                    TotalPages = totalPages
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm kiếm tài khoản");
                 throw;
             }
         }

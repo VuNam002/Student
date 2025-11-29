@@ -12,5 +12,6 @@ namespace Student_management.Services
         Task<AccountDto> CreateAccount(CreateAccount dto);
         Task<AccountDto> EditAccount(int id, CreateAccount dto);
         Task<bool> DeleteAccount(int id);
+        Task<Pagination> GetAccountPagination(AccountSearch accountSearch);
     }
 }
