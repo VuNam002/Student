@@ -160,8 +160,8 @@ export default function ItemsPage() {
 
   return (
     <>
-      <div className="text-2xl font-bold py-2">
-        Danh sách sản phẩm
+      <div className="text-2xl font-bold py-2 px-4">
+        Danh sách tài khoản
       </div>
       <div className="w-full text-gray-900 p-2 bg-white min-h-screen">
         {/* Search Bar */}

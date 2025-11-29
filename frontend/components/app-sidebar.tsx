@@ -57,7 +57,7 @@ const data = {
     },
     {
       title: "Tài Khoản",
-      url: "dashboard/account",
+      url: "/dashboard/account",
       icon: Bot,
       items: [
         {
