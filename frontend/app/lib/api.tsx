@@ -28,7 +28,7 @@ export async function fetchlogin(Email: string, MatKhau: string): Promise<LoginR
     }
 }
 
-// Decode JWT from localStorage and return an AccountDetail if possible
+
 export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     try {
         const token = localStorage.getItem('token');
@@ -36,11 +36,7 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
 
         const parts = token.split('.');
         if (parts.length < 2) return null;
-
-        // base64url -> base64
         const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-
-        // atob may produce unicode garbled characters; use decodeURIComponent trick
         const jsonPayload = decodeURIComponent(atob(payload).split('').map(function(c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
@@ -62,4 +58,112 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
         console.warn('Failed to decode token for user info', error);
         return null;
     }
+}
+
+export async function fetchAccount(): Promise<AccountDetail | null> {
+    try {
+        const res = await fetch(`${API_URL}/Account`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        })
+        if (res.ok) {
+            const data = await res.json();
+            return data;
+        } else {
+            console.error('Fetch account API error:', res.statusText);
+            return null;
+        }
+    } catch (error) {
+        console.error('Fetch account API error:', error);
+        return null;
+    }
+}
+
+export async function fetchAccountById(id: number): Promise<any|null >{
+    try {
+        const res = await fetch(`${API_URL}/Account/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        });
+        if(!res.ok) {
+            return null;
+        }
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error('Fetch account by ID API error:', error);
+        return null;
+    }
+}
+
+export async function fetchAccountEdit(id:number, updateAccount: any) {
+    try {
+        const res = await fetch(`${API_URL}/Account/${id}`, {
+            method: 'PATCh',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(updateAccount)
+        });
+        if (!res.ok) {
+            return null;
+        }
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error('Fetch account edit API error:', error);
+        return null;
+    }
+}
+
+export async function fetchAccountCreat(newAccount: any) {
+    try {
+        const res = await fetch(`${API_URL}/Account`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(newAccount)
+        });
+        if (!res.ok) {
+            return null;
+        }
+        const data = await res.json();
+        return data
+    } catch (error) {
+        console.error('Fetch account creat API error:', error);
+        return null;
+    }
+}
+
+export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
+    try {
+        const res = await fetch(`${API_URL}/Account/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        });
+
+        if (!res.ok) {
+            return null;
+        }
+        return true;
+    } catch (error) {
+        console.error('Delete item API error:', error);
+        return null;
+    }
+}
+
+export function logout() {
+    localStorage.removeItem('token');
 }

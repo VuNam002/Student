@@ -56,8 +56,8 @@ const data = {
       ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "Tài Khoản",
+      url: "account",
       icon: Bot,
       items: [
         {
