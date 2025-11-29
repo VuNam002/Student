@@ -60,25 +60,56 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     }
 }
 
-export async function fetchAccount(): Promise<AccountDetail | null> {
+export async function fetchAccount(page: number = 1, pageSize: number = 10, Keyword: string = '', trangThai?: boolean) {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+    });
+
+    if (Keyword) {
+        params.append('Keyword', Keyword);
+    }
+
+    if (trangThai !== undefined) {
+        params.append('TrangThai', trangThai.toString());
+    }
+
+    const url = `${API_URL}/Account/paginated?${params.toString()}`;
+
     try {
-        const res = await fetch(`${API_URL}/Account`, {
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-        })
-        if (res.ok) {
-            const data = await res.json();
-            return data;
-        } else {
-            console.error('Fetch account API error:', res.statusText);
-            return null;
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch accounts: ${response.status}`);
         }
+
+        const data = await response.json();
+        return {
+            items: data.Account.map((account: any) => ({
+                id: account.ID,
+                email: account.Email,
+                roleId: account.RoleID,
+                avatar: account.Avatar,
+                trangThai: account.TrangThai,
+                tenHienThi: account.TenHienThi,
+                ngayTao: account.NgayTao
+            })),
+            totalPages: data.TotalPages,
+            currentPage: data.Page,
+            totalCount: data.TotalCount,
+            pageSize: data.PageSize,
+            hasPrevious: data.HasPrevious,
+            hasNext: data.HasNext
+        };
     } catch (error) {
-        console.error('Fetch account API error:', error);
-        return null;
+        console.error( error);
+        throw error;
     }
 }
 
@@ -163,6 +194,7 @@ export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
         return null;
     }
 }
+
 
 export function logout() {
     localStorage.removeItem('token');
