@@ -21,7 +21,9 @@ export interface AccountDto {
   avatar: string | null;
   trangThai: boolean;
   tenHienThi: string | null;
+  HoTen: string | null;
   ngayTao: string;
+  SDT: string | null;
 }
 
 export interface Pagination {

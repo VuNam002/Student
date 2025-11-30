@@ -1,10 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchAccount, fetchAccountDeleted } from "../../lib/api";
+import { fetchAccount, fetchAccountDeleted, fetchAccountStatus } from "../../lib/api";
 import { useRouter } from "next/navigation";
-import { CheckCircle, XCircle, Trash2, NotebookPen, Search, X } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, NotebookPen, Search, X, Clock, Ban, Lock, Calendar, AlertCircle } from "lucide-react";
 import { AccountDto } from "@/app/lib/types";
+
+// Enum trạng thái
+export enum AccountStatus {
+  Pending = 0,
+  Active = 1,
+  Suspended = 2,
+  Locked = 3,
+  Expired = 4,
+  Inactive = 5
+}
+
+// Cấu hình hiển thị trạng thái
+const statusConfig = {
+  0: { label: "Chờ kích hoạt", icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
+  1: { label: "Hoạt động", icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
+  2: { label: "Tạm khóa", icon: AlertCircle, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" },
+  3: { label: "Khóa vĩnh viễn", icon: Lock, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
+  4: { label: "Hết hạn", icon: Calendar, color: "text-gray-600", bg: "bg-gray-50", border: "border-gray-200" },
+  5: { label: "Không hoạt động", icon: Ban, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" }
+};
 
 export default function ItemsPage() {
   const [items, setItems] = useState<AccountDto[]>([]);
@@ -14,9 +34,10 @@ export default function ItemsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const router = useRouter();
   
-  const itemsPerPage = 10;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     async function loadItems() {
@@ -59,6 +80,25 @@ export default function ItemsPage() {
   const handleSearchKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  const handleStatusChange = async (id: number, newStatus: number) => {
+    try {
+      const result = await fetchAccountStatus(id, newStatus);
+      if (result) {
+        setItems((currentItems) =>
+          currentItems.map((item) =>
+            item.id === id ? { ...item, trangThai: newStatus } : item
+          )
+        );
+        setOpenDropdown(null);
+      } else {
+        alert("Đã xảy ra lỗi khi cập nhật trạng thái.");
+      }
+    } catch (error) {
+      console.error(`Error updating status for item ${id}:`, error);
+      alert("Đã xảy ra lỗi khi cập nhật trạng thái.");
     }
   };
 
@@ -124,19 +164,62 @@ export default function ItemsPage() {
     }
   };
 
-  const StatusDisplay = ({ isActive }: { isActive: boolean }) => {
+  const StatusDisplay = ({ status, id }: { status: number; id: number }) => {
+    const config = statusConfig[status as keyof typeof statusConfig];
+    const Icon = config.icon;
+    const isOpen = openDropdown === id;
+
     return (
-      <div className="flex items-center gap-2">
-        {isActive ? (
-          <CheckCircle size={18} className="text-emerald-600" />
-        ) : (
-          <XCircle size={18} className="text-rose-600" />
-        )}
-        <span
-          className={isActive ? "text-gray-900 font-medium" : "text-gray-700"}
+      <div className="relative">
+        <button
+          onClick={() => setOpenDropdown(isOpen ? null : id)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${config.bg} ${config.border} hover:opacity-80 transition-all`}
         >
-          {isActive ? "Hoạt động" : "Tạm dừng"}
-        </span>
+          <Icon size={16} className={config.color} />
+          <span className={`${config.color} font-medium text-sm`}>
+            {config.label}
+          </span>
+          <svg
+            className={`w-4 h-4 ${config.color} transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-10" 
+              onClick={() => setOpenDropdown(null)}
+            />
+            <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+              {Object.entries(statusConfig).map(([key, value]) => {
+                const StatusIcon = value.icon;
+                const statusValue = parseInt(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => handleStatusChange(id, statusValue)}
+                    className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${
+                      statusValue === status ? 'bg-gray-50' : ''
+                    }`}
+                  >
+                    <StatusIcon size={16} className={value.color} />
+                    <span className={`${value.color} text-sm font-medium`}>
+                      {value.label}
+                    </span>
+                    {statusValue === status && (
+                      <CheckCircle size={14} className="ml-auto text-blue-600" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -223,7 +306,13 @@ export default function ItemsPage() {
                     Avatar
                   </th>
                   <th className="text-left p-4 font-normal text-gray-600">
-                    Tên hiển thị
+                    Chức vụ
+                  </th>
+                  <th className="text-left p-4 font-normal text-gray-600">
+                    Họ tên
+                  </th>
+                  <th className="text-left p-4 font-normal text-gray-600">
+                    Số điện thoại
                   </th>
                   <th className="text-left p-4 font-normal text-gray-600">
                     Email
@@ -263,11 +352,18 @@ export default function ItemsPage() {
                             className="w-10 h-10 rounded-lg object-cover"
                           />
                         )}
-                        
                       </div>
                     </td>
                     <td className="p-4 text-gray-700 max-w-xs truncate">
                       {row.tenHienThi}
+                    </td>
+
+                    <td className="p-4 text-gray-700 max-w-xs truncate">
+                      {row.HoTen}
+                    </td>
+
+                    <td className="p-4 text-gray-700 max-w-xs truncate">
+                      {row.SDT}
                     </td>
                  
                     <td className="p-4">
@@ -276,7 +372,7 @@ export default function ItemsPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <StatusDisplay isActive={row.trangThai} />
+                      <StatusDisplay status={row.trangThai} id={row.id} />
                     </td>
                     <td className="p-4 text-gray-700 text-sm">
                       {new Date(row.ngayTao).toLocaleDateString("vi-VN")}
@@ -324,7 +420,7 @@ export default function ItemsPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:cursor-not-allowed transition-colors"
             >
               Sau
             </button>

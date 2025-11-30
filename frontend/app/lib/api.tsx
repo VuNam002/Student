@@ -60,7 +60,7 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     }
 }
 
-export async function fetchAccount(page: number = 1, pageSize: number = 10, Keyword: string = '', trangThai?: boolean) {
+export async function fetchAccount(page: number = 1, pageSize: number = 5, Keyword: string = '', trangThai?: boolean) {
     const params = new URLSearchParams({
         page: page.toString(),
         pageSize: pageSize.toString(),
@@ -98,7 +98,9 @@ export async function fetchAccount(page: number = 1, pageSize: number = 10, Keyw
                 avatar: account.Avatar,
                 trangThai: account.TrangThai,
                 tenHienThi: account.TenHienThi,
-                ngayTao: account.NgayTao
+                ngayTao: account.NgayTao,
+                HoTen: account.HoTen,
+                SDT: account.SDT
             })),
             totalPages: data.TotalPages,
             currentPage: data.Page,
@@ -193,6 +195,24 @@ export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
         console.error('Delete item API error:', error);
         return null;
     }
+}
+
+export async function fetchAccountStatus(id: number, trangThai: number) {
+    const res = await fetch(`${API_URL}/Account/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(trangThai)
+    });
+    
+    if (!res.ok) {
+        return null;
+    }
+    
+    const data = await res.json();
+    return data;
 }
 
 
