@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchAccount, fetchAccountDeleted, fetchAccountStatus } from "../../lib/api";
 import { useRouter } from "next/navigation";
-import { CheckCircle, XCircle, Trash2, NotebookPen, Search, X, Clock, Ban, Lock, Calendar, AlertCircle } from "lucide-react";
+import { CheckCircle, Trash2, NotebookPen, Search, X, Clock, Ban, Lock, Calendar, AlertCircle } from "lucide-react";
 import { AccountDto } from "@/app/lib/types";
 import {
   Pagination,
@@ -431,7 +431,7 @@ export default function ItemsPage() {
                         </button>
                         <button
                           onClick={() =>
-                            router.push(`/dashboard/account/edit?id=${row.id}`)
+                            router.push(`/admin/account/edit?id=${row.id}`)
                           }
                           className="text-green-600 hover:text-green-800 hover:bg-green-100 p-1 rounded transition-colors font-medium"
                           title="Chỉnh sửa"

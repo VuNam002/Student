@@ -138,7 +138,7 @@ export async function fetchAccountById(id: number): Promise<any|null >{
 export async function fetchAccountEdit(id:number, updateAccount: any) {
     try {
         const res = await fetch(`${API_URL}/Account/${id}`, {
-            method: 'PATCh',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`

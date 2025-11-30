@@ -11,7 +11,6 @@ import {
   PieChart,
   Send,
   Settings2,
-  SquareTerminal,
 } from "lucide-react"
 
 import { NavMain } from "../components/nav-main"
@@ -36,36 +35,16 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: false,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
       title: "Tài Khoản",
-      url: "/dashboard/account",
+      url: "/admin",
       icon: Bot,
       items: [
         {
-          title: "Thêm tài khoản",
-          url: "/create-account",
+          title: "Danh sách tài khoản",
+          url: "/admin/account",
         },
         {
-          title: "Explorer",
+          title: "Thêm tài khoản",
           url: "#",
         },
         {
