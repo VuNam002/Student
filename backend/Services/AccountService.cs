@@ -240,6 +240,8 @@ namespace Student_management.Services
                 account.RoleID = dto.RoleID;
                 account.Avatar = dto.Avatar ?? account.Avatar;
                 account.TrangThai = dto.TrangThai;
+                account.HoTen = dto.HoTen ?? account.HoTen;
+                account.SDT = dto.SDT ?? account.SDT;
                 if (dto.NgayTao != default) account.NgayTao = dto.NgayTao;
 
                 await _context.SaveChangesAsync();
