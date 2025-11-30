@@ -6,7 +6,9 @@
         public string? MatKhau { get; set; }
         public int RoleID { get; set; }
         public string? Avatar { get; set; }
-        public bool TrangThai { get; set; } = true;
+        public string? HoTen { get; set; }
+        public string? SDT { get; set; }
+        public byte TrangThai { get; set; } = 1;
         public DateTime NgayTao { get; set; } = DateTime.Now;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Account;
+using Student_management.Enum;
 using Student_management.Services;
 
 namespace Student_management.Controllers
@@ -88,6 +89,8 @@ namespace Student_management.Controllers
                     Avatar = dto.Avatar,
                     TrangThai = dto.TrangThai,
                     NgayTao = dto.NgayTao,
+                    HoTen = dto.HoTen,
+                    SDT = dto.SDT
                 };
 
                 var createdAccount = await _accountService.CreateAccount(account);
@@ -123,6 +126,8 @@ namespace Student_management.Controllers
                     Avatar = dto.Avatar,
                     TrangThai = dto.TrangThai,
                     NgayTao = dto.NgayTao,
+                    HoTen = dto.HoTen,
+                    SDT = dto.SDT
                 };
 
                 var updatedAccount = await _accountService.EditAccount(id, account);
@@ -180,6 +185,26 @@ namespace Student_management.Controllers
             {
                 _logger.LogError(ex, "Đã xảy ra lỗi khi lấy danh sách tài khoản phân trang.");
                 return StatusCode(500, "Lỗi máy chủ nội bộ");
+            }
+        }
+        //cap nhat trang thai san pham
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateAccountStatus(int id, [FromBody] byte trangThai)
+        {
+            try
+            {
+                var updatedAccount = await _accountService.UpdateAccountStatus(id, (AccountStatus)trangThai);
+                return Ok(updatedAccount);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Account not found while updating status.");
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating account status.");
+                return StatusCode(500, "Internal server error");
             }
         }
     }

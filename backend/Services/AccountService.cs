@@ -4,8 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Student_management.Data;
 using Student_management.DTOs.Account;
+using Student_management.Enum;
+using Student_management.Helpers;
 using Student_management.Models;
-using Student_management.Helpers; 
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -44,6 +45,8 @@ namespace Student_management.Services
                         TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
                         Avatar = a.Avatar,
                         TrangThai = a.TrangThai,
+                        HoTen = a.HoTen,
+                        SDT = a.SDT,
                         NgayTao = a.NgayTao
                     })
                     .ToListAsync();
@@ -68,7 +71,8 @@ namespace Student_management.Services
             var account = await _context.Accounts
                 .FirstOrDefaultAsync(a => a.Email == loginRequest.Email);
 
-            if (account is null || account.TrangThai != true)
+            // SỬA: So sánh với 1 (Active) thay vì true
+            if (account is null || account.TrangThai != 1)
             {
                 return null;
             }
@@ -137,6 +141,8 @@ namespace Student_management.Services
                         RoleID = a.RoleID.ToString(),
                         TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
                         Avatar = a.Avatar,
+                        HoTen = a.HoTen,
+                        SDT = a.SDT,
                         TrangThai = a.TrangThai,
                         NgayTao = a.NgayTao
                     }).FirstOrDefaultAsync();
@@ -174,6 +180,8 @@ namespace Student_management.Services
                     Email = username,
                     RoleID = dto.RoleID,
                     Avatar = dto.Avatar,
+                    HoTen = dto.HoTen,
+                    SDT = dto.SDT,
                     TrangThai = dto.TrangThai,
                     NgayTao = dto.NgayTao
                 };
@@ -190,6 +198,8 @@ namespace Student_management.Services
                     Email = newAccount.Email,
                     RoleID = newAccount.RoleID.ToString(),
                     Avatar = newAccount.Avatar,
+                    HoTen = newAccount.HoTen,
+                    SDT = newAccount.SDT,
                     TrangThai = newAccount.TrangThai,
                     NgayTao = newAccount.NgayTao,
                     TenHienThi = await _context.Roles
@@ -247,7 +257,9 @@ namespace Student_management.Services
                     Avatar = account.Avatar,
                     TrangThai = account.TrangThai,
                     NgayTao = account.NgayTao,
-                    TenHienThi = tenHienThi
+                    TenHienThi = tenHienThi,
+                    HoTen = account.HoTen,
+                    SDT = account.SDT
                 };
             }
             catch (Exception ex)
@@ -275,6 +287,7 @@ namespace Student_management.Services
                 throw;
             }
         }
+
         public async Task<Pagination> GetAccountPagination(AccountSearch searchParams)
         {
             try
@@ -309,6 +322,8 @@ namespace Student_management.Services
                         RoleID = a.RoleID.ToString(),
                         TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
                         Avatar = a.Avatar,
+                        HoTen = a.HoTen,
+                        SDT = a.SDT,
                         TrangThai = a.TrangThai,
                         NgayTao = a.NgayTao
                     })
@@ -329,6 +344,27 @@ namespace Student_management.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi tìm kiếm tài khoản");
+                throw;
+            }
+        }
+
+        // Cập nhật trạng thái tài khoản
+        public async Task<bool> UpdateAccountStatus(int id, AccountStatus trangThai)
+        {
+            try
+            {
+                var account = await _context.Accounts.FindAsync(id);
+                if (account == null)
+                    return false;
+
+                account.TrangThai = (byte)trangThai;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Loi khi cap nhat trang thai tai khoan ID: {AccountId}", id);
                 throw;
             }
         }

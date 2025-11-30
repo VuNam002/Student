@@ -9,6 +9,8 @@
         public bool TrangThai { get; set; } = true;
         public string? TenHienThi { get; set; }
         public string? MatKhau { get; set; }
+        public string? HoTen { get; set; }
+        public string? SDT { get; set; }
         public DateTime NgayTao { get; set; } = DateTime.Now;
     }
 }

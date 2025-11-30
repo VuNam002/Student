@@ -25,7 +25,7 @@ namespace Student_management.Models
         public string? Avatar { get; set; }
 
         [Column("TrangThai")]
-        public bool TrangThai { get; set; } = true; 
+        public byte TrangThai { get; set; } = 1; 
 
         [Column("NgayTao")]
         public DateTime NgayTao { get; set; } = DateTime.Now;
@@ -33,11 +33,16 @@ namespace Student_management.Models
         [Column("RoleID")]
         public int RoleID { get; set; }
 
+        [Column("HoTen")]
+        public string? HoTen { get; set; }
+
+        [Column("SDT")]
+        public string? SDT { get; set; }
+
         [ForeignKey("RoleID")]
         public Role? Role { get; set; }
 
         public Teacher? Teacher { get; set; }
-
         public Student? Student { get; set; }
     }
 }
