@@ -11,6 +11,8 @@ import {
   PieChart,
   Send,
   Settings2,
+  LayoutDashboard,
+  CircleUserRound 
 } from "lucide-react"
 
 import { NavMain } from "../components/nav-main"
@@ -34,12 +36,12 @@ const navMain = [
   {
     title:" Dashboard",
     url: "/admin/dashboard",
-    icon: Command,
+    icon: LayoutDashboard ,
   },
   {
     title: "Tài Khoản",
     url: "#",
-    icon: Bot,
+    icon: CircleUserRound ,
     items: [
       {
         title: "Danh sách tài khoản",
@@ -57,11 +59,11 @@ const navMain = [
     icon: Shield ,
     items: [
       {
-        title: "Introduction",
+        title: "Danh sách quyền",
         url: "#",
       },
       {
-        title: "Get Started",
+        title: "Thêm quyền",
         url: "#",
       },
       {

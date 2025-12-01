@@ -6,7 +6,7 @@ import { fetchAccountById } from "@/app/lib/api";
 import { AccountDetail } from "@/app/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, CheckCircle, AlertCircle, Lock, Calendar, Ban } from "lucide-react";
 
@@ -69,14 +69,15 @@ export default function AccountDetailPage() {
   };
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 -mt-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-4">Chi tiết tài khoản</h1>
+      </div>
       <Button onClick={() => router.back()} variant="outline" className="mb-4">
         &larr; Back to Accounts
       </Button>
       <Card>
-        <CardHeader>
-          <CardTitle>Account Details</CardTitle>
-        </CardHeader>
+        
         <CardContent>
           {loading ? (
             <div className="space-y-4">
@@ -124,7 +125,7 @@ export default function AccountDetailPage() {
                   <p className="text-lg">{account.TenHienThi}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">SDT</span>
+                  <span className="text-sm font-medium text-muted-foreground">Số điện thoại</span>
                   <p className="text-lg">{account.SDT || 'N/A'}</p>
                 </div>
                 <div className="flex flex-col">
@@ -145,7 +146,7 @@ export default function AccountDetailPage() {
                   </p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">Date Created</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ngày Tạo</span>
                   <p className="text-lg">
                     {account.NgayTao ? new Date(account.NgayTao).toLocaleDateString() : 'N/A'}
                   </p>
