@@ -2,60 +2,71 @@ import { LoginResponse, AccountDetail } from "./types";
 
 const API_URL = 'http://localhost:5262/api';
 
+async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
+    const token = localStorage.getItem('token');
+
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login'; 
+        throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || `Request failed with status ${response.status}`);
+    }
+
+    if (response.headers.get('Content-Length') === '0' || response.status === 204) {
+        return null as T;
+    }
+    
+    if (response.headers.get('Content-Type')?.includes('application/json')) {
+        return response.json() as Promise<T>;
+    }
+
+    return response.text() as Promise<T>;
+}
+
+
 export async function fetchlogin(Email: string, MatKhau: string): Promise<LoginResponse> {
     try {
-        const res = await fetch(`${API_URL}/Account/login`, {
+        const token = await api<string>(`${API_URL}/Account/login`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ Email, MatKhau }),
         });
 
-        if (res.ok) {
-            const token = await res.text();
-            if (token) {
-                localStorage.setItem('token', token);
-                return { token: token };
-            } 
-            return { message: 'Received an empty token.' };
+        if (token) {
+            localStorage.setItem('token', token);
+            return { token };
         }
-        const errorMessage = await res.text();
-        return { message: errorMessage || 'Invalid credentials' };
-    } catch (error) {
+        return { message: 'Received an empty token.' };
+
+    } catch (error: any) {
         console.error('Login API error:', error);
-        return { message: 'An unexpected error occurred.' };
+        return { message: error.message || 'An unexpected error occurred.' };
     }
 }
-
 
 export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     try {
         const token = localStorage.getItem('token');
         if (!token) return null;
-
-        const parts = token.split('.');
-        if (parts.length < 2) return null;
-        const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(payload).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-
-        const parsed = JSON.parse(jsonPayload);
-
-        const user: AccountDetail = {
-            ID: parsed.ID ?? parsed.id ?? parsed.sub ?? 0,
-            Email: parsed.Email ?? parsed.email ?? '',
-            RoleID: parsed.RoleID ?? parsed.role ?? parsed.roleId,
-            Avatar: parsed.Avatar ?? parsed.avatar ?? null,
-            TrangThai: parsed.TrangThai ?? parsed.trangThai ?? undefined,
-            TenHienThi: parsed.TenHienThi ?? parsed.name ?? null,
-            NgayTao: parsed.NgayTao ?? parsed.iat ?? null,
-        };
-
-        return user;
+        
+        return await fetchAccountMe();
     } catch (error) {
-        console.warn('Failed to decode token for user info', error);
+        console.warn('Failed to fetch user from token', error);
         return null;
     }
 }
@@ -77,19 +88,7 @@ export async function fetchAccount(page: number = 1, pageSize: number = 5, Keywo
     const url = `${API_URL}/Account/paginated?${params.toString()}`;
 
     try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch accounts: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await api<any>(url, { method: 'GET' });
         return {
             items: data.Account.map((account: any) => ({
                 id: account.ID,
@@ -110,46 +109,26 @@ export async function fetchAccount(page: number = 1, pageSize: number = 5, Keywo
             hasNext: data.HasNext
         };
     } catch (error) {
-        console.error( error);
+        console.error(error);
         throw error;
     }
 }
 
-export async function fetchAccountById(id: number): Promise<any|null >{
+export async function fetchAccountById(id: number): Promise<any | null> {
     try {
-        const res = await fetch(`${API_URL}/Account/${id}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-        });
-        if(!res.ok) {
-            return null;
-        }
-        const data = await res.json();
-        return data;
+        return await api<any>(`${API_URL}/Account/${id}`, { method: 'GET' });
     } catch (error) {
         console.error('Fetch account by ID API error:', error);
         return null;
     }
 }
 
-export async function fetchAccountEdit(id:number, updateAccount: any) {
+export async function fetchAccountEdit(id: number, updateAccount: any) {
     try {
-        const res = await fetch(`${API_URL}/Account/${id}`, {
+        return await api<any>(`${API_URL}/Account/${id}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
             body: JSON.stringify(updateAccount)
         });
-        if (!res.ok) {
-            return null;
-        }
-        const data = await res.json();
-        return data;
     } catch (error) {
         console.error('Fetch account edit API error:', error);
         return null;
@@ -158,19 +137,10 @@ export async function fetchAccountEdit(id:number, updateAccount: any) {
 
 export async function fetchAccountCreat(newAccount: any) {
     try {
-        const res = await fetch(`${API_URL}/Account`, {
+        return await api<any>(`${API_URL}/Account`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
             body: JSON.stringify(newAccount)
         });
-        if (!res.ok) {
-            return null;
-        }
-        const data = await res.json();
-        return data
     } catch (error) {
         console.error('Fetch account creat API error:', error);
         return null;
@@ -179,17 +149,9 @@ export async function fetchAccountCreat(newAccount: any) {
 
 export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
     try {
-        const res = await fetch(`${API_URL}/Account/${id}`, {
+        await api<any>(`${API_URL}/Account/${id}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
         });
-
-        if (!res.ok) {
-            return null;
-        }
         return true;
     } catch (error) {
         console.error('Delete item API error:', error);
@@ -198,24 +160,28 @@ export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
 }
 
 export async function fetchAccountStatus(id: number, trangThai: number) {
-    const res = await fetch(`${API_URL}/Account/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(trangThai)
-    });
-    
-    if (!res.ok) {
+    try {
+        return await api<any>(`${API_URL}/Account/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify(trangThai)
+        });
+    } catch (error) {
+        console.error('Fetch account status API error:', error);
         return null;
     }
-    
-    const data = await res.json();
-    return data;
 }
 
+export async function fetchAccountMe(): Promise<AccountDetail | null> {
+    try {
+        return await api<AccountDetail>(`${API_URL}/Account/me`, { method: 'GET' });
+    } catch (error) {
+        console.error('Fetch account me API error:', error);
+        return null;
+    }
+}
 
 export function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
 }

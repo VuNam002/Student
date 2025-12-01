@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { AccountDetail } from "./types"; // Assuming AccountDetail is the user type
+import { AccountDetail } from "./types";
 import { fetchUserFromToken } from "./api";
 
 interface AuthContextType {
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (user && (pathname === "/login" || pathname === "/")) {
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     }
   }, [isLoading, user, pathname, router]);
 

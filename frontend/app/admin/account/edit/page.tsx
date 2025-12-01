@@ -6,7 +6,7 @@ import { fetchAccountById, fetchAccountEdit } from '../../../lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, UploadCloud } from 'lucide-react';
 
 // Re-defining enum and config for self-containment, ideally this should be in a shared file.
 enum AccountStatus {
@@ -36,7 +36,7 @@ interface FormData {
   tenHienThi: string;
   hoTen: string;
   sdt: string;
-  matKhau: string; // Added for password changes
+  matKhau: string; 
 }
 
 function EditAccountForm() {
@@ -46,6 +46,7 @@ function EditAccountForm() {
 
   const [formData, setFormData] = useState<Partial<FormData>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,11 +91,43 @@ function EditAccountForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const CLOUDINARY_CLOUD_NAME = "duzubskpy"; 
+    const CLOUDINARY_UPLOAD_PRESET = "students"; 
+
+    setIsUploading(true);
+    const apiFormData = new FormData();
+    apiFormData.append('file', file);
+    apiFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: apiFormData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({ ...prev, avatar: data.secure_url }));
+        alert("Tải ảnh lên thành công!");
+      } else {
+        throw new Error('Tải ảnh lên thất bại.');
+      }
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      alert("Đã xảy ra lỗi khi tải ảnh lên.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accountId) return;
 
-    // Construct the payload, excluding the password if it's empty
     const payload: any = {
       Email: formData.email,
       RoleID: formData.roleID,
@@ -133,83 +166,86 @@ function EditAccountForm() {
 
   return (
     <>
-    <div className="text-2xl font-bold py-2 px-6">
+      <div className="text-2xl font-bold py-2 px-6">
         Cập nhật tài khoản
       </div>
-    <div className="p-4 md:p-6">
+      <div className="p-4 md:p-6">
         <Button variant="outline" onClick={() => router.push('/admin/account')} className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại danh sách
+          <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại danh sách
         </Button>
-      <Card>
-        <CardHeader>
-          <CardTitle>Chỉnh sửa thông tin tài khoản</CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSave}>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="hoTen" className="font-medium">Họ và Tên</label>
-                <Input id="hoTen" name="hoTen" value={formData.hoTen || ''} onChange={handleChange} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Chỉnh sửa thông tin tài khoản</CardTitle>
+          </CardHeader>
+          <form onSubmit={handleSave}>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="hoTen" className="font-medium">Họ và Tên</label>
+                  <Input id="hoTen" name="hoTen" value={formData.hoTen || ''} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="tenHienThi" className="font-medium">Vai trò</label>
+                  <Input id="tenHienThi" name="tenHienThi" value={formData.tenHienThi || ''} onChange={handleChange} />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label htmlFor="tenHienThi" className="font-medium">Tên hiển thị</label>
-                <Input id="tenHienThi" name="tenHienThi" value={formData.tenHienThi || ''} onChange={handleChange} />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="email" className="font-medium">Email</label>
-                <Input id="email" name="email" type="email" value={formData.email || ''} onChange={handleChange} />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="sdt" className="font-medium">Số điện thoại</label>
-                <Input id="sdt" name="sdt" value={formData.sdt || ''} onChange={handleChange} />
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <label htmlFor="matKhau" className="font-medium">Mật khẩu mới</label>
-              <Input id="matKhau" name="matKhau" type="password" placeholder="Để trống nếu không muốn thay đổi" onChange={handleChange} />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="font-medium">Email</label>
+                  <Input id="email" name="email" type="email" value={formData.email || ''} onChange={handleChange} />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sdt" className="font-medium">Số điện thoại</label>
+                  <Input id="sdt" name="sdt" value={formData.sdt || ''} onChange={handleChange} />
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="trangThai" className="font-medium">Trạng thái</label>
-                <select
-                  id="trangThai"
-                  name="trangThai"
-                  value={formData.trangThai}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                >
-                  {Object.entries(statusConfig).map(([key, { label }]) => (
-                    <option key={key} value={key}>{label}</option>
-                  ))}
-                </select>
+                <label htmlFor="matKhau" className="font-medium">Mật khẩu mới</label>
+                <Input id="matKhau" name="matKhau" type="password" placeholder="Để trống nếu không muốn thay đổi" onChange={handleChange} />
               </div>
-               <div className="space-y-2">
-                <label htmlFor="roleID" className="font-medium">Vai trò</label>
-                <Input id="roleID" name="roleID" value={formData.roleID || ''} onChange={handleChange} placeholder="VD: Admin, User,..." />
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <label htmlFor="avatar" className="font-medium">URL Avatar</label>
-              <div className="flex items-center gap-4">
-                  <Input id="avatar" name="avatar" value={formData.avatar || ''} onChange={handleChange} className="flex-grow"/>
-                  {formData.avatar && <img src={formData.avatar} alt="Avatar" className="w-12 h-12 rounded-full object-cover"/>}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="trangThai" className="font-medium">Trạng thái</label>
+                  <select
+                    id="trangThai"
+                    name="trangThai"
+                    value={formData.trangThai}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    {Object.entries(statusConfig).map(([key, { label }]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
 
-          </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => router.back()}>Hủy</Button>
-            <Button type="submit">Lưu thay đổi</Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+              <div className="space-y-2">
+                <label className="font-medium">Avatar</label>
+                <div className="flex items-center gap-4">
+                  {formData.avatar && <img src={formData.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />}
+                  <Input id="avatar-upload" type="file" onChange={handleImageUpload} className="hidden" />
+                  <Button type="button" variant="outline" asChild>
+                    <label htmlFor="avatar-upload" className="cursor-pointer">
+                      <UploadCloud className="mr-2 h-4 w-4" />
+                      Chọn ảnh
+                    </label>
+                  </Button>
+                  {isUploading && <div className="text-sm text-gray-500">Đang tải lên...</div>}
+                </div>
+              </div>
+
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => router.back()}>Hủy</Button>
+              <Button type="submit">Lưu thay đổi</Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </>
   );
 }
