@@ -137,7 +137,7 @@ export async function fetchAccountEdit(id: number, updateAccount: any) {
 
 export async function fetchAccountCreat(newAccount: any) {
     try {
-        return await api<any>(`${API_URL}/Account`, {
+        return await api<any>(`${API_URL}/Account/create`, {
             method: 'POST',
             body: JSON.stringify(newAccount)
         });
@@ -180,8 +180,14 @@ export async function fetchAccountMe(): Promise<AccountDetail | null> {
     }
 }
 
-export function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+export async function logout() {
+    try {
+        await api<any>(`${API_URL}/Account/logout`, { method: 'POST' });
+    } catch (error) {
+        console.error('Logout API error:', error);
+    } finally {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    }
 }

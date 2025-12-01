@@ -12,6 +12,8 @@ export interface AccountDetail {
   TrangThai?: boolean;
   TenHienThi?: string | null;
   NgayTao?: string | null;
+  HoTen?: string | null;
+  SDT?: string | null;
 }
 
 export interface AccountDto {

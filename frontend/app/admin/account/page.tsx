@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchAccount, fetchAccountDeleted, fetchAccountStatus } from "../../lib/api";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Trash2, NotebookPen, Search, X, Clock, Ban, Lock, Calendar, AlertCircle } from "lucide-react";
+import { CheckCircle, Trash2, NotebookPen, Search, X, Clock, Ban, Lock, Calendar, AlertCircle, Eye } from "lucide-react";
 import { AccountDto } from "@/app/lib/types";
 import {
   Pagination,
@@ -428,6 +428,15 @@ export default function ItemsPage() {
                           title="Xóa"
                         >
                           <Trash2 size={18} />
+                        </button>
+                        <button
+                          onClick={() =>
+                            router.push(`/admin/account/detail/${row.id}`)
+                          }
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1 rounded transition-colors font-medium"
+                          title="Xem chi tiết"
+                        >
+                          <Eye size={18} />
                         </button>
                         <button
                           onClick={() =>

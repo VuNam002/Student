@@ -8,7 +8,9 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
+import { logout } from "@/app/lib/api"
 import {
   Avatar,
   AvatarFallback,
@@ -29,6 +31,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { fetchAccountMe } from "@/app/lib/api"
 
 export function NavUser({
   user,
@@ -40,6 +43,22 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+  }
+
+  const handleSubmit = async () => {
+    try {
+      const accountDetail = await fetchAccountMe()
+      if (accountDetail) {
+        router.push(`/admin/account/detail/${accountDetail.ID}`)
+      }
+    } catch (error) {
+      console.error("Failed to fetch account me", error)
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -51,11 +70,16 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+                <AvatarImage
+                  src={user.avatar ?? undefined}
+                  alt={user.name ?? ""}
+                />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name ?? 'User'}</span>
+                <span className="truncate font-medium">
+                  {user.name ?? "User"}
+                </span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -70,11 +94,16 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+                  <AvatarImage
+                    src={user.avatar ?? undefined}
+                    alt={user.name ?? ""}
+                  />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name ?? 'User'}</span>
+                  <span className="truncate font-medium">
+                    {user.name ?? "User"}
+                  </span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
@@ -88,7 +117,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSubmit}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
@@ -102,7 +131,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
