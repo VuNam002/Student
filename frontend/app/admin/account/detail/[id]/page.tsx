@@ -121,15 +121,15 @@ export default function AccountDetailPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">Chức vụ</span>
+                  <span className="text-sm font-medium text-muted-foreground">Chức vụ:</span>
                   <p className="text-lg">{account.TenHienThi}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">Số điện thoại</span>
+                  <span className="text-sm font-medium text-muted-foreground">Số điện thoại:</span>
                   <p className="text-lg">{account.SDT || 'N/A'}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">Trạng thái</span>
+                  <span className="text-sm font-medium text-muted-foreground">Trạng thái:</span>
                   <p className="text-lg">
                     {(() => {
                       const statusDisplay = getStatusDisplay(account.TrangThai);
@@ -146,7 +146,7 @@ export default function AccountDetailPage() {
                   </p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-muted-foreground">Ngày Tạo</span>
+                  <span className="text-sm font-medium text-muted-foreground">Ngày Tạo:</span>
                   <p className="text-lg">
                     {account.NgayTao ? new Date(account.NgayTao).toLocaleDateString() : 'N/A'}
                   </p>
