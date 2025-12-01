@@ -110,9 +110,9 @@ namespace Student_management.Services
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
+                Subject = new ClaimsIdentity(new[] 
                 {
-                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()), // Thêm AccountID vào Claims
                     new Claim(ClaimTypes.Name, account.Email ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(10),
@@ -369,6 +369,15 @@ namespace Student_management.Services
                 _logger.LogError(ex, "Loi khi cap nhat trang thai tai khoan ID: {AccountId}", id);
                 throw;
             }
+        }
+
+        public async Task LogoutAsync(string token)
+        {
+            // In a real-world scenario, you would invalidate the token here.
+            // This could be done by adding the token to a blacklist cache (e.g., Redis)
+            // with an expiration set to the token's remaining validity period.
+            // For this example, we'll just simulate a successful logout.
+            await Task.CompletedTask;
         }
     }
 }

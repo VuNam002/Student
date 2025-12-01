@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Account;
 using Student_management.Enum;
 using Student_management.Services;
+using System.Security.Claims;
 
 namespace Student_management.Controllers
 {
@@ -204,6 +206,57 @@ namespace Student_management.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating account status.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<AccountDto>> GetMyAccount()
+        {
+            try
+            {
+                var accountIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(accountIdClaim) || !int.TryParse(accountIdClaim, out var accountId))
+                {
+                    return Unauthorized("Không thể xác thực tài khoản.");
+                }
+
+                var account = await _accountService.Detail(accountId);
+                if (account == null)
+                {
+                    return NotFound("Không tìm thấy tài khoản.");
+                }
+
+                return Ok(account);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy thông tin tài khoản của tôi.");
+                return StatusCode(500, "Lỗi máy chủ nội bộ");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                // Extract the token from the Authorization header
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized("Token not found.");
+                }
+
+                await _accountService.LogoutAsync(token);
+
+                return NoContent(); // Or Ok("Logged out successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during logout.");
                 return StatusCode(500, "Internal server error");
             }
         }

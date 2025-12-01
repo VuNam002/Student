@@ -15,5 +15,6 @@ namespace Student_management.Services
         Task<bool> DeleteAccount(int id);
         Task<Pagination> GetAccountPagination(AccountSearch accountSearch);
         Task<bool> UpdateAccountStatus(int id, AccountStatus trangThai);
+        Task LogoutAsync(string token);
     }
 }
