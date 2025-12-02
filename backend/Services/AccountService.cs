@@ -85,8 +85,10 @@ namespace Student_management.Services
                 return null;
             }
 
-            // Sử dụng HashHelper để verify password
-            if (!HashHelper.VerifyPassword(loginRequest.MatKhau, storedPassword))
+            // Mã hóa mật khẩu người dùng nhập vào bằng MD5 để so sánh
+            var inputPasswordHash = HashHelper.ComputeMd5Hash(loginRequest.MatKhau);
+
+            if (storedPassword != inputPasswordHash)
             {
                 _logger.LogWarning("Login attempt failed for user {User} due to incorrect password.", loginRequest.Email);
                 return null;

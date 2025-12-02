@@ -7,33 +7,27 @@ namespace Student_management.Models
     public class Student
     {
         [Key]
-        [Column("StudentID")]
         public int StudentID { get; set; }
 
         [Required]
-        [Column("MaSV")]
         [StringLength(20)]
         public string? MaSV { get; set; }
 
         [Required]
-        [Column("HoTen")]
         [StringLength(100)]
-        public string? HoTen { get; set; }
+        public string ?HoTen { get; set; }
 
-        [Column("NgaySinh")]
-        public DateTime? NgaySinh { get; set; } 
+        public DateTime? NgaySinh { get; set; }
 
+        public int? ClassID { get; set; }
 
-        [Column("LopID")]
-        public int? LopID { get; set; }
+        public int? AccountID { get; set; }
 
-        [Column("TaiKhoanID")]
-        public int? TaiKhoanID { get; set; }
-
-        [ForeignKey("LopID")]
+        // Navigation Properties
+        [ForeignKey("ClassID")]
         public Class? Class { get; set; }
 
-        [ForeignKey("TaiKhoanID")]
+        [ForeignKey("AccountID")]
         public Account? Account { get; set; }
     }
 }

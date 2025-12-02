@@ -7,30 +7,28 @@ namespace Student_management.Models
     public class Teacher
     {
         [Key]
-        [Column("TeacherID")]
         public int TeacherID { get; set; }
 
         [Required]
-        [Column("MaGV")]
-        public string? MaGV { get; set; }
+        [StringLength(20)]
+        public string ?MaGV { get; set; }
 
-        [Column("HoTen")]
+        [Required]
+        [StringLength(100)]
         public string? HoTen { get; set; }
 
-        [Column("Email")]
+        [StringLength(100)]
         public string? Email { get; set; }
 
-        [Column("KhoaID")]
-        public int? KhoaID { get; set; }
+        public int? DepartmentID { get; set; }
 
-        [Column("TaiKhoanID")]
-        public int? TaiKhoanID { get; set; }
-        [ForeignKey("KhoaID")]
+        public int? AccountID { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("DepartmentID")]
         public Department? Department { get; set; }
 
-        [ForeignKey("TaiKhoanID")]
+        [ForeignKey("AccountID")]
         public Account? Account { get; set; }
-
-        public ICollection<Class>? Classes { get; set; }
     }
 }

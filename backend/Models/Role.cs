@@ -7,16 +7,14 @@ namespace Student_management.Models
     public class Role
     {
         [Key]
-        [Column("RoleID")]
         public int RoleID { get; set; }
-        [Required]
 
-        [Column("MaRole")]
+        [Required]
+        [StringLength(20)]
         public string? MaRole { get; set; }
 
-        [Column("TenHienThi")]
+        [Required]
+        [StringLength(50)]
         public string? TenHienThi { get; set; }
-
-        public ICollection<Account>? Accounts { get; set; }
     }
 }

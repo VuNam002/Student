@@ -7,26 +7,22 @@ namespace Student_management.Models
     public class Class
     {
         [Key]
-        [Column("ClassID")]
         public int ClassID { get; set; }
 
         [Required]
-        [Column("TenLop")]
         [StringLength(100)]
-        public string? TenLop { get; set; }
-        [Column("KhoaID")]
-        public int? KhoaID { get; set; }
+        public string ?TenLop { get; set; }
 
+        public int? DepartmentID { get; set; }
 
-        [Column("GVCN_ID")]
-        public int? GVCN_ID { get; set; }
+        [Column("TeacherID_GVCN")]
+        public int? TeacherID_GVCN { get; set; }
 
-        [ForeignKey("KhoaID")]
+        // Navigation Properties
+        [ForeignKey("DepartmentID")]
         public Department? Department { get; set; }
 
-        [ForeignKey("GVCN_ID")]
+        [ForeignKey("TeacherID_GVCN")]
         public Teacher? TeacherGVCN { get; set; }
-
-        public ICollection<Student>? Students { get; set; }
     }
 }

@@ -43,7 +43,8 @@ namespace Student_management.Controllers
 
                 if (token == null)
                 {
-                    return Unauthorized("Invalid username or password");
+                    _logger.LogWarning("Login failed for user {Email}. Invalid credentials or inactive account.", loginRequest.Email);
+                    return Unauthorized("Tên đăng nhập hoặc mật khẩu không hợp lệ.");
                 }
                 return Ok(token);
             }
