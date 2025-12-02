@@ -44,7 +44,7 @@ namespace Student_management.Controllers
                 if (token == null)
                 {
                     _logger.LogWarning("Login failed for user {Email}. Invalid credentials or inactive account.", loginRequest.Email);
-                    return Unauthorized("Tên đăng nhập hoặc mật khẩu không hợp lệ.");
+                    return Unauthorized("Invalid username or password.");
                 }
                 return Ok(token);
             }
@@ -63,7 +63,7 @@ namespace Student_management.Controllers
                 var account = await _accountService.Detail(id);
                 if (account == null)
                 {
-                    return NotFound("Khong tim thay tai khoan");
+                    return NotFound("Account not found.");
                 }
                 return Ok(account);
             }
@@ -81,7 +81,7 @@ namespace Student_management.Controllers
             {
                 if (dto == null)
                 {
-                    return BadRequest("Du lieu nguoi dung khong hop le");
+                    return BadRequest("Invalid user data.");
                 }
 
                 var account = new CreateAccount
@@ -118,7 +118,7 @@ namespace Student_management.Controllers
             {
                 if (dto == null)
                 {
-                    return BadRequest("Du lieu nguoi dung khong hop le");
+                    return BadRequest("Invalid user data.");
                 }
 
                 var account = new CreateAccount
@@ -152,6 +152,7 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
@@ -160,9 +161,9 @@ namespace Student_management.Controllers
                 var result = await _accountService.DeleteAccount(id);
                 if (!result)
                 {
-                    return NotFound("Khong tim thay tai khoan de xoa");
+                    return NotFound("Account not found to delete.");
                 }
-                return Ok(new { message = "Xoa tai khoan thanh cong" });
+                return Ok(new { message = "Account deleted successfully." });
             }
             catch (Exception ex)
             {
@@ -170,15 +171,16 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
         [HttpGet("paginated")]
         public async Task<ActionResult<Pagination>> GetAccountPagination([FromQuery] AccountSearch accountSearch)
         {
             try
             {
-                // Xác thực giá trị Page và PageSize
+                // Validate Page and PageSize
                 if (accountSearch.Page <= 0 || accountSearch.PageSize <= 0)
                 {
-                    return BadRequest("Page và PageSize phải lớn hơn 0.");
+                    return BadRequest("Page and PageSize must be greater than 0.");
                 }
 
                 Pagination paginatedAccounts = await _accountService.GetAccountPagination(accountSearch);
@@ -186,11 +188,12 @@ namespace Student_management.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy danh sách tài khoản phân trang.");
-                return StatusCode(500, "Lỗi máy chủ nội bộ");
+                _logger.LogError(ex, "An error occurred while getting paginated account list.");
+                return StatusCode(500, "Internal server error");
             }
         }
-        //cap nhat trang thai san pham
+
+        // Update product status (This comment seems to be a typo in your original code, should likely be "Update account status")
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateAccountStatus(int id, [FromBody] byte trangThai)
         {
@@ -210,6 +213,7 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
         [Authorize]
         [HttpGet("me")]
         public async Task<ActionResult<AccountDto>> GetMyAccount()
@@ -219,21 +223,21 @@ namespace Student_management.Controllers
                 var accountIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(accountIdClaim) || !int.TryParse(accountIdClaim, out var accountId))
                 {
-                    return Unauthorized("Không thể xác thực tài khoản.");
+                    return Unauthorized("Unable to authenticate account.");
                 }
 
                 var account = await _accountService.Detail(accountId);
                 if (account == null)
                 {
-                    return NotFound("Không tìm thấy tài khoản.");
+                    return NotFound("Account not found.");
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy thông tin tài khoản của tôi.");
-                return StatusCode(500, "Lỗi máy chủ nội bộ");
+                _logger.LogError(ex, "An error occurred while getting my account information.");
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -253,7 +257,7 @@ namespace Student_management.Controllers
 
                 await _accountService.LogoutAsync(token);
 
-                return NoContent(); // Or Ok("Logged out successfully");
+                return NoContent(); // Or Ok(new { message = "Logged out successfully" });
             }
             catch (Exception ex)
             {

@@ -21,6 +21,6 @@ namespace Student_management.Models
         public string? Module { get; set; }
 
         [StringLength(255)]
-        public string? MoTa { get; set; }
+        public string? description { get; set; }
     }
 }

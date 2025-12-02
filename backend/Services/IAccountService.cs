@@ -1,4 +1,5 @@
 ﻿using Student_management.DTOs.Account;
+using Student_management.DTOs.Permission;
 using Student_management.Enum;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,5 +17,6 @@ namespace Student_management.Services
         Task<Pagination> GetAccountPagination(AccountSearch accountSearch);
         Task<bool> UpdateAccountStatus(int id, AccountStatus trangThai);
         Task LogoutAsync(string token);
+        Task<List<PermissionDto>> GetAllPermissions(string? module = null);
     }
 }

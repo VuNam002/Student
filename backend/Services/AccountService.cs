@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Student_management.Data;
 using Student_management.DTOs.Account;
+using Student_management.DTOs.Permission;
 using Student_management.Enum;
 using Student_management.Helpers;
 using Student_management.Models;
@@ -380,6 +381,11 @@ namespace Student_management.Services
             // with an expiration set to the token's remaining validity period.
             // For this example, we'll just simulate a successful logout.
             await Task.CompletedTask;
+        }
+
+        public Task<List<PermissionDto>> GetAllPermissions(string? module = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }
