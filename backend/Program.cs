@@ -56,6 +56,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<PermissionService>();
 
 
 builder.Services.AddEndpointsApiExplorer();

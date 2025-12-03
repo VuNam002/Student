@@ -101,5 +101,66 @@ namespace Student_management.Services
                 throw;
             }
         }
+        public async Task<bool> AssignPermissionToRoleDto(int roleId, List<int> permissionIds)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Kiểm tra role tồn tại
+                var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == roleId);
+                if (!roleExists)
+                {
+                    _logger.LogWarning("Role not found with ID: {roleId}", roleId);
+                    return false;
+                }
+
+                // Xóa permissions cũ
+                var existingPermissions = await _context.RolePermissions
+                    .Where(rp => rp.RoleID == roleId)
+                    .ToListAsync();
+
+                if (existingPermissions.Any())
+                {
+                    _context.RolePermissions.RemoveRange(existingPermissions);
+                }
+
+                // Validate và lấy permissions hợp lệ
+                var validPermissionIds = await _context.Permissions
+                    .Where(p => permissionIds.Contains(p.PermissionID))
+                    .Select(p => p.PermissionID)
+                    .ToListAsync();
+
+                if (!validPermissionIds.Any())
+                {
+                    _logger.LogWarning("No valid permissions found for role {roleId}", roleId);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // Thêm permissions mới
+                var newRolePermissions = validPermissionIds.Select(permissionId => new RolePermission
+                {
+                    RoleID = roleId,
+                    PermissionID = permissionId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    IsDeleted = false
+                }).ToList();
+
+                await _context.RolePermissions.AddRangeAsync(newRolePermissions);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("Successfully assigned {count} permissions to role {roleId}",
+                    newRolePermissions.Count, roleId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error assigning permissions to role {roleId}", roleId);
+                throw;
+            }
+        }
     }
 }

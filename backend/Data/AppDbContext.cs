@@ -49,20 +49,25 @@ namespace Student_management.Data
             modelBuilder.Entity<Account>()
                 .ToTable(tb => tb.HasTrigger("Account_Trigger"));
 
-            modelBuilder.Entity<RolePermission>()
-                .HasKey(rp => rp.RolePermissionID);
+            // ✅ ĐÚNG - Config RolePermission
+            modelBuilder.Entity<RolePermission>(entity =>
+            {
+                entity.HasKey(rp => rp.RolePermissionID);
 
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePermissions)
-                .HasForeignKey(rp => rp.RoleID)
-                .OnDelete(DeleteBehavior.Cascade);
+                // Relationship với Role
+                entity.HasOne(rp => rp.Role)
+                    .WithMany(r => r.RolePermissions)
+                    .HasForeignKey(rp => rp.RoleID)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Permission)
-                .WithMany()
-                .HasForeignKey(rp => rp.PermissionID)
-                .OnDelete(DeleteBehavior.Cascade);
+                // Relationship với Permission
+                entity.HasOne(rp => rp.Permission)
+                    .WithMany(p => p.RolePermissions)
+                    .HasForeignKey(rp => rp.PermissionID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.ToTable("RolePermission");
+            });
 
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Department)
@@ -90,7 +95,6 @@ namespace Student_management.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Class>().ToTable("Class");
-            modelBuilder.Entity<RolePermission>().ToTable("Role_Permission");
 
             base.OnModelCreating(modelBuilder);
         }
