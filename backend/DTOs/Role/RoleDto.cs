@@ -2,10 +2,11 @@
 {
     public class RoleDto
     {
-        public int ID { get; set; }
-        public int MaRole { get; set; }
-        public string? TenHienThi { get; set; }
-        public string? description { get; set; }
-        public DateTime created_at { get; set; } = DateTime.Now;
+        public int RoleID { get; set; }
+        public int RoleCode { get; set; }
+        public string? RoleName { get; set; }
+        public string? Description { get; set; }
+        public bool? IsDeleted { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
