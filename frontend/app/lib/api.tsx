@@ -1,3 +1,4 @@
+import { Avatar } from "@radix-ui/react-avatar";
 import { LoginResponse, AccountDetail } from "./types";
 
 const API_URL = 'http://localhost:5262/api';
@@ -40,11 +41,11 @@ async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 
-export async function fetchlogin(Email: string, MatKhau: string): Promise<LoginResponse> {
+export async function fetchlogin(Email: string, Password: string): Promise<LoginResponse> {
     try {
         const token = await api<string>(`${API_URL}/Account/login`, {
             method: 'POST',
-            body: JSON.stringify({ Email, MatKhau }),
+            body: JSON.stringify({ Email, Password }),
         });
 
         if (token) {
@@ -71,9 +72,9 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     }
 }
 
-export async function fetchAccount(page: number = 1, pageSize: number = 5, Keyword: string = '', trangThai?: boolean) {
+export async function fetchAccount(Page: number = 1, pageSize: number = 5, Keyword: string = '', Status?: boolean) {
     const params = new URLSearchParams({
-        page: page.toString(),
+        page: Page.toString(),
         pageSize: pageSize.toString(),
     });
 
@@ -81,8 +82,8 @@ export async function fetchAccount(page: number = 1, pageSize: number = 5, Keywo
         params.append('Keyword', Keyword);
     }
 
-    if (trangThai !== undefined) {
-        params.append('TrangThai', trangThai.toString());
+    if (Status !== undefined) {
+        params.append('TrangThai', Status.toString());
     }
 
     const url = `${API_URL}/Account/paginated?${params.toString()}`;
@@ -91,15 +92,15 @@ export async function fetchAccount(page: number = 1, pageSize: number = 5, Keywo
         const data = await api<any>(url, { method: 'GET' });
         return {
             items: data.Account.map((account: any) => ({
-                id: account.ID,
-                email: account.Email,
+                ID: account.ID,
+                Email: account.Email,
                 roleId: account.RoleID,
-                avatar: account.Avatar,
-                trangThai: account.TrangThai,
-                tenHienThi: account.TenHienThi,
-                ngayTao: account.NgayTao,
-                HoTen: account.HoTen,
-                SDT: account.SDT
+                Avatar: account.Avatar,
+                Status: account.Status,
+                RoleName: account.RoleName,
+                CreatedAt: account.CreatedAt,
+                FullName: account.FullName,
+                PhoneNumber: account.PhoneNumber
             })),
             totalPages: data.TotalPages,
             currentPage: data.Page,
@@ -159,11 +160,11 @@ export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
     }
 }
 
-export async function fetchAccountStatus(id: number, trangThai: number) {
+export async function fetchAccountStatus(id: number, Status: number) {
     try {
         return await api<any>(`${API_URL}/Account/${id}/status`, {
             method: 'PATCH',
-            body: JSON.stringify(trangThai)
+            body: JSON.stringify(Status)
         });
     } catch (error) {
         console.error('Fetch account status API error:', error);

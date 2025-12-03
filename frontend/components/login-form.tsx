@@ -32,14 +32,11 @@ export function LoginForm({
       if (data.token) {
         const token = data.token;
         localStorage.setItem("token", token);
-
-        // Try to load user from token and set auth context so redirects work
         try {
           const user = await fetchUserFromToken();
           if (user) {
             auth.login(user, token);
           } else {
-            // Fallback: just navigate to dashboard
             router.push("/dashboard");
           }
         } catch (e) {

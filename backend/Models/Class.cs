@@ -1,28 +1,38 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_management.Models
+[Table("Class")]
+public class Class
 {
-    [Table("Class")]
-    public class Class
-    {
-        [Key]
-        public int ClassID { get; set; }
+    [Key]
+    public int ClassID { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string ?TenLop { get; set; }
+    [Required]
+    [StringLength(100)]
+    public string? ClassName { get; set; }
 
-        public int? DepartmentID { get; set; }
+    [Required]
+    [StringLength(20)]
+    public string? ClassCode { get; set; } 
 
-        [Column("TeacherID_GVCN")]
-        public int? TeacherID_GVCN { get; set; }
+    public int? DepartmentID { get; set; }
 
-        // Navigation Properties
-        [ForeignKey("DepartmentID")]
-        public Department? Department { get; set; }
+    public int? TeacherID { get; set; } 
 
-        [ForeignKey("TeacherID_GVCN")]
-        public Teacher? TeacherGVCN { get; set; }
-    }
+    [StringLength(20)]
+    public string? AcademicYear { get; set; }
+
+    public int? Semester { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+    [ForeignKey("DepartmentID")]
+    public Department? Department { get; set; }
+
+    [ForeignKey("TeacherID")]
+    public Teacher? Teacher { get; set; }
+
+    public ICollection<Student>? Students { get; set; }
 }

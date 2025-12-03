@@ -1,48 +1,43 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Student_management.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_management.Models
+[Table("Account")]
+public class Account
 {
-    [Table("Account")]
-    public class Account
-    {
-        [Key]
-        [Column("AccountID")]
-        public int AccountID { get; set; }
+    [Key]
+    public int AccountID { get; set; }
 
-        [Required]
-        [Column("Email")]
-        [StringLength(50)]
-        public string? Email { get; set; }
+    [Required]
+    [StringLength(100)]
+    public string? Email { get; set; } 
 
-        [Required]
-        [Column("MatKhau")]
-        [StringLength(255)]
-        public string? MatKhau { get; set; }
+    [Required]
+    [StringLength(255)]
+    public string? Password { get; set; }
 
-        [Column("Avatar")]
-        [StringLength(255)]
-        public string? Avatar { get; set; }
+    [StringLength(255)]
+    public string? Avatar { get; set; }
 
-        [Column("TrangThai")]
-        public byte TrangThai { get; set; } = 1; 
+    public byte Status { get; set; } = 1; 
 
-        [Column("NgayTao")]
-        public DateTime NgayTao { get; set; } = DateTime.Now;
+    [Required]
+    public int RoleID { get; set; }
 
-        [Column("RoleID")]
-        public int RoleID { get; set; }
+    [StringLength(100)]
+    public string? FullName { get; set; }
 
-        [Column("HoTen")]
-        public string? HoTen { get; set; }
+    [StringLength(15)]
+    public string? PhoneNumber { get; set; }
 
-        [Column("SDT")]
-        public string? SDT { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("RoleID")]
-        public Role? Role { get; set; }
 
-        public Teacher? Teacher { get; set; }
-        public Student? Student { get; set; }
-    }
+    [ForeignKey("RoleID")]
+    public Role? Role { get; set; }
+
+    public Teacher? Teacher { get; set; }
+    public Student? Student { get; set; }
 }

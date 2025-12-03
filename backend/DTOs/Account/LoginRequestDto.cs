@@ -8,6 +8,6 @@ namespace Student_management.DTOs.Account
         public string? Email { get; set; }
 
         [Required(ErrorMessage ="Mat khau la bat buoc")]
-        public string? MatKhau {  get; set; }
+        public string? Password {  get; set; }
     }
 }

@@ -9,23 +9,23 @@ export interface AccountDetail {
   Email: string;
   RoleID?: string;
   Avatar?: string | null;
-  TrangThai?: boolean;
-  TenHienThi?: string | null;
-  NgayTao?: string | null;
-  HoTen?: string | null;
-  SDT?: string | null;
+  Status: number;
+  RoleName?: string | null;
+  CreatedAt?: string | null;
+  FullName?: string | null;
+  PhoneNumber?: string | null;
 }
 
 export interface AccountDto {
-  id: number;
-  email: string;
-  roleID: number;
-  avatar: string | null;
-  trangThai: boolean;
-  tenHienThi: string | null;
-  HoTen: string | null;
-  ngayTao: string;
-  SDT: string | null;
+  ID: number;
+  Email: string;
+  RoleID: number;
+  Avatar: string | null;
+  Status: number;
+  RoleName: string | null;
+  FullName: string | null;
+  CreatedAt: string;
+  PhoneNumber: string | null;
 }
 
 export interface Pagination {

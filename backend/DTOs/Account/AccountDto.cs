@@ -6,10 +6,12 @@
         public string? Email { get; set; }
         public string? RoleID { get; set; }
         public string? Avatar { get; set; }
-        public byte TrangThai { get; set; } // SỬA: Đổi từ bool sang byte
-        public string? TenHienThi { get; set; }
-        public string? HoTen { get; set; }
-        public string? SDT { get; set; }
-        public DateTime NgayTao { get; set; } = DateTime.Now;
+        public byte Status { get; set; } 
+        public string? RoleName { get; set; }
+        public string? FullName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }
 }

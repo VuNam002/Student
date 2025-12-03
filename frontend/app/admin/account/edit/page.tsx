@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ArrowLeft, UploadCloud } from 'lucide-react';
 
-// Re-defining enum and config for self-containment, ideally this should be in a shared file.
 enum AccountStatus {
   Pending = 0,
   Active = 1,
@@ -28,15 +27,14 @@ const statusConfig = {
 };
 
 interface FormData {
-  id: number;
-  email: string;
-  roleID: string;
-  avatar: string;
-  trangThai: number;
-  tenHienThi: string;
-  hoTen: string;
-  sdt: string;
-  matKhau: string; 
+  ID: number;
+  Email: string;
+  RoleID: number;
+  Avatar: string | null;
+  Status: number;
+  FullName: string | null;
+  PhoneNumber: string | null;
+  Password?: string;
 }
 
 function EditAccountForm() {
@@ -62,15 +60,14 @@ function EditAccountForm() {
         const data = await fetchAccountById(Number(accountId));
         if (data) {
           setFormData({
-            id: data.ID,
-            email: data.Email || '',
-            roleID: data.RoleID || '',
-            avatar: data.Avatar || '',
-            trangThai: typeof data.TrangThai === 'boolean' ? (data.TrangThai ? 1 : 0) : data.TrangThai,
-            tenHienThi: data.TenHienThi || '',
-            hoTen: data.HoTen || '',
-            sdt: data.SDT || '',
-            matKhau: '', 
+            ID: data.ID,
+            Email: data.Email || '',
+            RoleID: data.RoleID || 0,
+            Avatar: data.Avatar || null,
+            Status: data.Status ?? 0,
+            FullName: data.FullName || '',
+            PhoneNumber: data.PhoneNumber || '',
+            Password: '',
           });
         } else {
           setError("Không thể tải dữ liệu tài khoản.");
@@ -88,7 +85,10 @@ function EditAccountForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'Status' || name === 'RoleID' ? Number(value) : value 
+    }));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,7 +111,7 @@ function EditAccountForm() {
 
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({ ...prev, avatar: data.secure_url }));
+        setFormData(prev => ({ ...prev, Avatar: data.secure_url }));
         alert("Tải ảnh lên thành công!");
       } else {
         throw new Error('Tải ảnh lên thất bại.');
@@ -126,20 +126,19 @@ function EditAccountForm() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!accountId) return;
+    if (!accountId || !formData.ID) return;
 
     const payload: any = {
-      Email: formData.email,
-      RoleID: formData.roleID,
-      Avatar: formData.avatar,
-      TrangThai: Number(formData.trangThai),
-      TenHienThi: formData.tenHienThi,
-      HoTen: formData.hoTen,
-      SDT: formData.sdt,
+      Email: formData.Email,
+      RoleID: Number(formData.RoleID),
+      Avatar: formData.Avatar,
+      Status: Number(formData.Status),
+      FullName: formData.FullName,
+      PhoneNumber: formData.PhoneNumber,
     };
 
-    if (formData.matKhau) {
-      payload.MatKhau = formData.matKhau;
+    if (formData.Password && formData.Password.trim() !== '') {
+      payload.Password = formData.Password;
     }
 
     try {
@@ -181,38 +180,67 @@ function EditAccountForm() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label htmlFor="hoTen" className="font-medium">Họ và Tên</label>
-                  <Input id="hoTen" name="hoTen" value={formData.hoTen || ''} onChange={handleChange} />
+                  <label htmlFor="FullName" className="font-medium">Họ và Tên</label>
+                  <Input 
+                    id="FullName" 
+                    name="FullName" 
+                    value={formData.FullName || ''} 
+                    onChange={handleChange} 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="tenHienThi" className="font-medium">Vai trò</label>
-                  <Input id="tenHienThi" name="tenHienThi" value={formData.tenHienThi || ''} onChange={handleChange} />
+                  <label htmlFor="RoleID" className="font-medium">Role ID</label>
+                  <Input 
+                    id="RoleID" 
+                    name="RoleID" 
+                    type="number"
+                    value={formData.RoleID || ''} 
+                    onChange={handleChange} 
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label htmlFor="email" className="font-medium">Email</label>
-                  <Input id="email" name="email" type="email" value={formData.email || ''} onChange={handleChange} />
+                  <label htmlFor="Email" className="font-medium">Email</label>
+                  <Input 
+                    id="Email" 
+                    name="Email" 
+                    type="email" 
+                    value={formData.Email || ''} 
+                    onChange={handleChange} 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sdt" className="font-medium">Số điện thoại</label>
-                  <Input id="sdt" name="sdt" value={formData.sdt || ''} onChange={handleChange} />
+                  <label htmlFor="PhoneNumber" className="font-medium">Số điện thoại</label>
+                  <Input 
+                    id="PhoneNumber" 
+                    name="PhoneNumber" 
+                    value={formData.PhoneNumber || ''} 
+                    onChange={handleChange} 
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="matKhau" className="font-medium">Mật khẩu mới</label>
-                <Input id="matKhau" name="matKhau" type="password" placeholder="Để trống nếu không muốn thay đổi" onChange={handleChange} />
+                <label htmlFor="Password" className="font-medium">Mật khẩu mới</label>
+                <Input 
+                  id="Password" 
+                  name="Password" 
+                  type="password" 
+                  placeholder="Để trống nếu không muốn thay đổi" 
+                  value={formData.Password || ''}
+                  onChange={handleChange} 
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label htmlFor="trangThai" className="font-medium">Trạng thái</label>
+                  <label htmlFor="Status" className="font-medium">Trạng thái</label>
                   <select
-                    id="trangThai"
-                    name="trangThai"
-                    value={formData.trangThai}
+                    id="Status"
+                    name="Status"
+                    value={formData.Status ?? 0}
                     onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
@@ -226,8 +254,20 @@ function EditAccountForm() {
               <div className="space-y-2">
                 <label className="font-medium">Avatar</label>
                 <div className="flex items-center gap-4">
-                  {formData.avatar && <img src={formData.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />}
-                  <Input id="avatar-upload" type="file" onChange={handleImageUpload} className="hidden" />
+                  {formData.Avatar && (
+                    <img 
+                      src={formData.Avatar} 
+                      alt="Avatar" 
+                      className="w-16 h-16 rounded-full object-cover" 
+                    />
+                  )}
+                  <Input 
+                    id="avatar-upload" 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleImageUpload} 
+                    className="hidden" 
+                  />
                   <Button type="button" variant="outline" asChild>
                     <label htmlFor="avatar-upload" className="cursor-pointer">
                       <UploadCloud className="mr-2 h-4 w-4" />
@@ -250,8 +290,6 @@ function EditAccountForm() {
   );
 }
 
-
-// Use Suspense to handle client-side data fetching with searchParams
 export default function EditAccountPage() {
     return (
         <Suspense fallback={<div>Đang tải...</div>}>

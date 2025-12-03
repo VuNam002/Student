@@ -96,7 +96,7 @@ export default function ItemsPage() {
       if (result) {
         setItems((currentItems) =>
           currentItems.map((item) =>
-            item.id === id ? { ...item, trangThai: newStatus } : item
+            item.ID === id ? { ...item, Status: newStatus } : item
           )
         );
         setOpenDropdown(null);
@@ -117,7 +117,7 @@ export default function ItemsPage() {
       const result = await fetchAccountDeleted(id);
       if (result) {
         setItems((currentItems) =>
-          currentItems.filter((item) => item.id !== id)
+          currentItems.filter((item) => item.ID !== id)
         );
         setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
       } else {
@@ -145,7 +145,7 @@ export default function ItemsPage() {
       const allSuccess = results.every(result => result !== null);
       if (allSuccess) {
         setItems((currentItems) =>
-          currentItems.filter((item) => !selectedRows.includes(item.id))
+          currentItems.filter((item) => !selectedRows.includes(item.ID))
         );
         setSelectedRows([]);
       } else {
@@ -167,7 +167,7 @@ export default function ItemsPage() {
     if (selectedRows.length === items.length) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(items.map((item) => item.id));
+      setSelectedRows(items.map((item) => item.ID));
     }
   };
 
@@ -206,8 +206,8 @@ export default function ItemsPage() {
     return pages;
   };
 
-  const StatusDisplay = ({ status, id }: { status: number; id: number }) => {
-    const config = statusConfig[status as keyof typeof statusConfig];
+  const StatusDisplay = ({ Status, id }: { Status: number; id: number }) => {
+    const config = statusConfig[Status as keyof typeof statusConfig];
     const Icon = config.icon;
     const isOpen = openDropdown === id;
 
@@ -246,14 +246,14 @@ export default function ItemsPage() {
                     key={key}
                     onClick={() => handleStatusChange(id, statusValue)}
                     className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${
-                      statusValue === status ? 'bg-gray-50' : ''
+                      statusValue === Status ? 'bg-gray-50' : ''
                     }`}
                   >
                     <StatusIcon size={16} className={value.color} />
                     <span className={`${value.color} text-sm font-medium`}>
                       {value.label}
                     </span>
-                    {statusValue === status && (
+                    {statusValue === Status && (
                       <CheckCircle size={14} className="ml-auto text-blue-600" />
                     )}
                   </button>
@@ -373,57 +373,56 @@ export default function ItemsPage() {
               <tbody>
                 {items.map((row) => (
                   <tr
-                    key={row.id}
+                    key={row.ID}
                     className={`border-b border-gray-100 transition-colors hover:bg-gray-50`}
                   >
                     <td className="p-4">
                       <input
                         type="checkbox"
-                        checked={selectedRows.includes(row.id)}
-                        onChange={() => toggleRow(row.id)}
+                        checked={selectedRows.includes(row.ID)}
+                        onChange={() => toggleRow(row.ID)}
                         className="w-4 h-4 cursor-pointer accent-blue-600"
                       />
                     </td>
                     
                     <td className="p-4 font-medium text-gray-900">
                       <div className="flex items-center gap-3">
-                        {row.avatar && (
+                        {row.Avatar && (
                           <img
-                            src={row.avatar}
-                            alt={row.tenHienThi}
+                            src={row.Avatar}
                             className="w-10 h-10 rounded-lg object-cover"
                           />
                         )}
                       </div>
                     </td>
                     <td className="p-4 text-gray-700 max-w-xs truncate">
-                      {row.tenHienThi}
+                      {row.RoleName}
                     </td>
 
                     <td className="p-4 text-gray-700 max-w-xs truncate">
-                      {row.HoTen}
+                      {row.FullName}
                     </td>
 
                     <td className="p-4 text-gray-700 max-w-xs truncate">
-                      {row.SDT}
+                      {row.PhoneNumber}
                     </td>
                  
                     <td className="p-4">
                       <span className="px-3 py-1 rounded-lg text-sm text-gray-700">
-                        {row.email}
+                        {row.Email}
                       </span>
                     </td>
                     <td className="p-4">
-                      <StatusDisplay status={row.trangThai} id={row.id} />
+                      <StatusDisplay Status={row.Status} id={row.ID} />
                     </td>
                     <td className="p-4 text-gray-700 text-sm">
-                      {new Date(row.ngayTao).toLocaleDateString("vi-VN")}
+                      {new Date(row.CreatedAt).toLocaleDateString("vi-VN")}
                     </td>
 
                     <td className="p-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleDeleteSingle(row.id)}
+                          onClick={() => handleDeleteSingle(row.ID)}
                           className="text-red-600 hover:text-red-800 hover:bg-red-100 p-1 rounded transition-colors font-medium"
                           title="Xóa"
                         >
@@ -431,7 +430,7 @@ export default function ItemsPage() {
                         </button>
                         <button
                           onClick={() =>
-                            router.push(`/admin/account/detail/${row.id}`)
+                            router.push(`/admin/account/detail/${row.ID}`)
                           }
                           className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1 rounded transition-colors font-medium"
                           title="Xem chi tiết"
@@ -440,7 +439,7 @@ export default function ItemsPage() {
                         </button>
                         <button
                           onClick={() =>
-                            router.push(`/admin/account/edit?id=${row.id}`)
+                            router.push(`/admin/account/edit?id=${row.ID}`)
                           }
                           className="text-green-600 hover:text-green-800 hover:bg-green-100 p-1 rounded transition-colors font-medium"
                           title="Chỉnh sửa"

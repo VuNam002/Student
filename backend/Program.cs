@@ -38,7 +38,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.AllowAnyOrigin()
+                          policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });
@@ -66,7 +66,7 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Nh?p JWT token vào ?ây (Bearer <token>)",
+        Description = "Nhap JWT token vao day (Bearer <token>)",
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"

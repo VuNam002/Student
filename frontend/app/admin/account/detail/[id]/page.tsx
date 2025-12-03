@@ -111,28 +111,28 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center space-x-4 mb-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={account.Avatar || ""} alt={account.TenHienThi || "Avatar"} />
-                  <AvatarFallback>{getInitials(account.TenHienThi)}</AvatarFallback>
+                  <AvatarImage src={account.Avatar || ""} alt={account.RoleName || "Avatar"} />
+                  <AvatarFallback>{getInitials(account.RoleName)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-2xl font-bold">{account.HoTen}</h2>
+                  <h2 className="text-2xl font-bold">{account.RoleName}</h2>
                   <p className="text-muted-foreground">{account.Email}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-muted-foreground">Chức vụ:</span>
-                  <p className="text-lg">{account.TenHienThi}</p>
+                  <p className="text-lg">{account.RoleName}</p>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-muted-foreground">Số điện thoại:</span>
-                  <p className="text-lg">{account.SDT || 'N/A'}</p>
+                  <p className="text-lg">{account.PhoneNumber || 'N/A'}</p>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-muted-foreground">Trạng thái:</span>
                   <p className="text-lg">
                     {(() => {
-                      const statusDisplay = getStatusDisplay(account.TrangThai);
+                      const statusDisplay = getStatusDisplay(account.Status);
                       const StatusIcon = statusDisplay.icon;
                       return (
                         <span
@@ -148,7 +148,7 @@ export default function AccountDetailPage() {
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-muted-foreground">Ngày Tạo:</span>
                   <p className="text-lg">
-                    {account.NgayTao ? new Date(account.NgayTao).toLocaleDateString() : 'N/A'}
+                    {account.CreatedAt ? new Date(account.CreatedAt).toLocaleDateString() : 'N/A'}
                   </p>
                 </div>
               </div>

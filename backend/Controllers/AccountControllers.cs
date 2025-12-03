@@ -87,13 +87,13 @@ namespace Student_management.Controllers
                 var account = new CreateAccount
                 {
                     Email = dto.Email,
-                    MatKhau = dto.MatKhau,
+                    Password = dto.Password,
                     RoleID = dto.RoleID,
                     Avatar = dto.Avatar,
-                    TrangThai = dto.TrangThai,
-                    NgayTao = dto.NgayTao,
-                    HoTen = dto.HoTen,
-                    SDT = dto.SDT
+                    Status = dto.Status,
+                    CreatedAt = dto.CreatedAt,
+                    FullName = dto.FullName,
+                    PhoneNumber = dto.PhoneNumber
                 };
 
                 var createdAccount = await _accountService.CreateAccount(account);
@@ -124,13 +124,13 @@ namespace Student_management.Controllers
                 var account = new CreateAccount
                 {
                     Email = dto.Email,
-                    MatKhau = dto.MatKhau,
+                    Password = dto.Password,
                     RoleID = dto.RoleID,
                     Avatar = dto.Avatar,
-                    TrangThai = dto.TrangThai,
-                    NgayTao = dto.NgayTao,
-                    HoTen = dto.HoTen,
-                    SDT = dto.SDT
+                    Status = dto.Status,
+                    CreatedAt = dto.CreatedAt,
+                    FullName = dto.FullName,
+                    PhoneNumber = dto.PhoneNumber
                 };
 
                 var updatedAccount = await _accountService.EditAccount(id, account);

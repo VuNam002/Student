@@ -2,8 +2,8 @@
 {
     public class CreatePermission
     {
-        public string? TenHienThi { get; set; }
+        public string? PermissionName { get; set; }
         public string? Module { get; set; }
-        public string? description { get; set; }
+        public string? Description { get; set; }
     }
 }

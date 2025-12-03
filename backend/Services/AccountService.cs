@@ -36,19 +36,21 @@ namespace Student_management.Services
             try
             {
                 return await _context.Accounts
-                    .AsNoTracking()
+                    .AsNoTracking()//tat co che theo doi
                     .Include(a => a.Role)
                     .Select(a => new AccountDto
                     {
                         ID = a.AccountID,
                         Email = a.Email,
                         RoleID = a.RoleID.ToString(),
-                        TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
+                        RoleName = a.Role != null ? a.Role.RoleName : null,
                         Avatar = a.Avatar,
-                        TrangThai = a.TrangThai,
-                        HoTen = a.HoTen,
-                        SDT = a.SDT,
-                        NgayTao = a.NgayTao
+                        Status = a.Status,
+                        FullName = a.FullName,
+                        PhoneNumber = a.PhoneNumber,
+                        CreatedAt = a.CreatedAt,
+                        IsDeleted = a.IsDeleted,
+                        UpdatedAt = a.UpdatedAt
                     })
                     .ToListAsync();
             }
@@ -63,7 +65,7 @@ namespace Student_management.Services
         {
             if (loginRequest is null) return null;
 
-            if (string.IsNullOrEmpty(loginRequest.MatKhau) || loginRequest.MatKhau.Length < 6)
+            if (string.IsNullOrEmpty(loginRequest.Password) || loginRequest.Password.Length < 6)
             {
                 _logger.LogWarning("Login attempt for {User} with too short password.", loginRequest.Email);
                 return null;
@@ -72,13 +74,12 @@ namespace Student_management.Services
             var account = await _context.Accounts
                 .FirstOrDefaultAsync(a => a.Email == loginRequest.Email);
 
-            // SỬA: So sánh với 1 (Active) thay vì true
-            if (account is null || account.TrangThai != 1)
+            if (account is null || account.Status != 1)
             {
                 return null;
             }
 
-            var storedPassword = account.MatKhau;
+            var storedPassword = account.Password;
 
             if (string.IsNullOrWhiteSpace(storedPassword))
             {
@@ -86,8 +87,8 @@ namespace Student_management.Services
                 return null;
             }
 
-            // Mã hóa mật khẩu người dùng nhập vào bằng MD5 để so sánh
-            var inputPasswordHash = HashHelper.ComputeMd5Hash(loginRequest.MatKhau);
+           
+            var inputPasswordHash = HashHelper.ComputeMd5Hash(loginRequest.Password);
 
             if (storedPassword != inputPasswordHash)
             {
@@ -115,7 +116,7 @@ namespace Student_management.Services
             {
                 Subject = new ClaimsIdentity(new[] 
                 {
-                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()), // Thêm AccountID vào Claims
+                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()), 
                     new Claim(ClaimTypes.Name, account.Email ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(10),
@@ -142,12 +143,12 @@ namespace Student_management.Services
                         ID = a.AccountID,
                         Email = a.Email,
                         RoleID = a.RoleID.ToString(),
-                        TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
+                        RoleName = a.Role != null ? a.Role.RoleName : null,
                         Avatar = a.Avatar,
-                        HoTen = a.HoTen,
-                        SDT = a.SDT,
-                        TrangThai = a.TrangThai,
-                        NgayTao = a.NgayTao
+                        FullName = a.FullName,
+                        PhoneNumber = a.PhoneNumber,
+                        Status = a.Status,
+                        CreatedAt = a.CreatedAt
                     }).FirstOrDefaultAsync();
 
                 return account;
@@ -167,7 +168,7 @@ namespace Student_management.Services
                 if (string.IsNullOrWhiteSpace(username))
                     throw new InvalidOperationException("TenDangNhap is required.");
 
-                if (string.IsNullOrWhiteSpace(dto.MatKhau) || dto.MatKhau.Length < 6)
+                if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
                     throw new InvalidOperationException("MatKhau is required and must be at least 6 characters.");
 
                 var exists = await _context.Accounts.AnyAsync(a => a.Email == username);
@@ -183,14 +184,13 @@ namespace Student_management.Services
                     Email = username,
                     RoleID = dto.RoleID,
                     Avatar = dto.Avatar,
-                    HoTen = dto.HoTen,
-                    SDT = dto.SDT,
-                    TrangThai = dto.TrangThai,
-                    NgayTao = dto.NgayTao
+                    FullName = dto.FullName,
+                    PhoneNumber = dto.PhoneNumber,
+                    Status = dto.Status,
+                    CreatedAt = dto.CreatedAt
                 };
 
-                // Sử dụng HashHelper để hash password
-                newAccount.MatKhau = HashHelper.ComputeMd5Hash(dto.MatKhau);
+                newAccount.Password = HashHelper.ComputeMd5Hash(dto.Password);
 
                 _context.Accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
@@ -201,13 +201,13 @@ namespace Student_management.Services
                     Email = newAccount.Email,
                     RoleID = newAccount.RoleID.ToString(),
                     Avatar = newAccount.Avatar,
-                    HoTen = newAccount.HoTen,
-                    SDT = newAccount.SDT,
-                    TrangThai = newAccount.TrangThai,
-                    NgayTao = newAccount.NgayTao,
-                    TenHienThi = await _context.Roles
+                    FullName = newAccount.FullName,
+                    PhoneNumber = newAccount.PhoneNumber,
+                    Status = newAccount.Status,
+                    CreatedAt = newAccount.CreatedAt,
+                    RoleName = await _context.Roles
                         .Where(r => r.RoleID == newAccount.RoleID)
-                        .Select(r => r.TenHienThi)
+                        .Select(r => r.RoleName)
                         .FirstOrDefaultAsync()
                 };
             }
@@ -232,26 +232,25 @@ namespace Student_management.Services
 
                 account.Email = dto.Email ?? account.Email;
 
-                // Sử dụng HashHelper để hash password mới
-                if (!string.IsNullOrWhiteSpace(dto.MatKhau))
+                if (!string.IsNullOrWhiteSpace(dto.Password))
                 {
-                    if (dto.MatKhau.Length < 6)
+                    if (dto.Password.Length < 6)
                         throw new InvalidOperationException("MatKhau phai co it nhat 6 ky tu.");
-                    account.MatKhau = HashHelper.ComputeMd5Hash(dto.MatKhau);
+                    account.Password = HashHelper.ComputeMd5Hash(dto.Password);
                 }
 
                 account.RoleID = dto.RoleID;
                 account.Avatar = dto.Avatar ?? account.Avatar;
-                account.TrangThai = dto.TrangThai;
-                account.HoTen = dto.HoTen ?? account.HoTen;
-                account.SDT = dto.SDT ?? account.SDT;
-                if (dto.NgayTao != default) account.NgayTao = dto.NgayTao;
+                account.Status = dto.Status;
+                account.FullName = dto.FullName ?? account.FullName;
+                account.PhoneNumber = dto.PhoneNumber ?? account.PhoneNumber;
+                if (dto.CreatedAt != default) account.CreatedAt = dto.CreatedAt;
 
                 await _context.SaveChangesAsync();
 
-                var tenHienThi = await _context.Roles
+                var roleName = await _context.Roles
                     .Where(r => r.RoleID == account.RoleID)
-                    .Select(r => r.TenHienThi)
+                    .Select(r => r.RoleName)
                     .FirstOrDefaultAsync();
 
                 return new AccountDto
@@ -260,11 +259,11 @@ namespace Student_management.Services
                     Email = account.Email,
                     RoleID = account.RoleID.ToString(),
                     Avatar = account.Avatar,
-                    TrangThai = account.TrangThai,
-                    NgayTao = account.NgayTao,
-                    TenHienThi = tenHienThi,
-                    HoTen = account.HoTen,
-                    SDT = account.SDT
+                    Status = account.Status,
+                    CreatedAt = account.CreatedAt,
+                    RoleName = roleName,
+                    FullName = account.FullName,
+                    PhoneNumber = account.PhoneNumber
                 };
             }
             catch (Exception ex)
@@ -279,10 +278,12 @@ namespace Student_management.Services
             try
             {
                 var account = await _context.Accounts.FindAsync(id);
-                if (account == null)
+                if (account == null|| account.IsDeleted)
+                {
                     return false;
-
-                _context.Accounts.Remove(account);
+                }
+                account.IsDeleted = true;
+                _context.Accounts.Update(account);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -299,24 +300,20 @@ namespace Student_management.Services
             {
                 var query = _context.Accounts.AsNoTracking().Include(a => a.Role).AsQueryable();
 
-                // Lọc theo từ khóa
                 if (!string.IsNullOrWhiteSpace(searchParams.Keyword))
                 {
                     var keyword = searchParams.Keyword.Trim().ToLower();
                     query = query.Where(a => a.Email!.ToLower().Contains(keyword) ||
-                                             (a.Role != null && a.Role.TenHienThi!.ToLower().Contains(keyword)));
+                                             (a.Role != null && a.Role.RoleName!.ToLower().Contains(keyword)));
                 }
 
-                // Lọc theo trạng thái
-                if (searchParams.TrangThai.HasValue)
+                if (searchParams.Status.HasValue)
                 {
-                    query = query.Where(a => a.TrangThai == searchParams.TrangThai.Value);
+                    query = query.Where(a => a.Status == searchParams.Status.Value);
                 }
 
-                // Tổng số bản ghi
                 var totalCount = await query.CountAsync();
 
-                // Lấy dữ liệu phân trang
                 var accounts = await query
                     .Skip((searchParams.Page - 1) * searchParams.PageSize)
                     .Take(searchParams.PageSize)
@@ -325,16 +322,16 @@ namespace Student_management.Services
                         ID = a.AccountID,
                         Email = a.Email,
                         RoleID = a.RoleID.ToString(),
-                        TenHienThi = a.Role != null ? a.Role.TenHienThi : null,
+                        RoleName = a.Role != null ? a.Role.RoleName : null,
                         Avatar = a.Avatar,
-                        HoTen = a.HoTen,
-                        SDT = a.SDT,
-                        TrangThai = a.TrangThai,
-                        NgayTao = a.NgayTao
+                        FullName = a.FullName,
+                        PhoneNumber = a.PhoneNumber,
+                        Status = a.Status,
+                        CreatedAt = a.CreatedAt
                     })
                     .ToListAsync();
 
-                // Tính tổng số trang
+               //Pagination
                 var totalPages = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
 
                 return new Pagination
@@ -353,8 +350,7 @@ namespace Student_management.Services
             }
         }
 
-        // Cập nhật trạng thái tài khoản
-        public async Task<bool> UpdateAccountStatus(int id, AccountStatus trangThai)
+        public async Task<bool> UpdateAccountStatus(int id, AccountStatus Status)
         {
             try
             {
@@ -362,7 +358,7 @@ namespace Student_management.Services
                 if (account == null)
                     return false;
 
-                account.TrangThai = (byte)trangThai;
+                account.Status = (byte)Status;
 
                 await _context.SaveChangesAsync();
                 return true;
@@ -376,10 +372,6 @@ namespace Student_management.Services
 
         public async Task LogoutAsync(string token)
         {
-            // In a real-world scenario, you would invalidate the token here.
-            // This could be done by adding the token to a blacklist cache (e.g., Redis)
-            // with an expiration set to the token's remaining validity period.
-            // For this example, we'll just simulate a successful logout.
             await Task.CompletedTask;
         }
 

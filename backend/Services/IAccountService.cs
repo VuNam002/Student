@@ -15,7 +15,7 @@ namespace Student_management.Services
         Task<AccountDto> EditAccount(int id, CreateAccount dto);
         Task<bool> DeleteAccount(int id);
         Task<Pagination> GetAccountPagination(AccountSearch accountSearch);
-        Task<bool> UpdateAccountStatus(int id, AccountStatus trangThai);
+        Task<bool> UpdateAccountStatus(int id, AccountStatus Status);
         Task LogoutAsync(string token);
         Task<List<PermissionDto>> GetAllPermissions(string? module = null);
     }

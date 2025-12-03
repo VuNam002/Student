@@ -30,10 +30,12 @@ namespace Student_management.Services
                 var result = await query.Select(p => new PermissionDto
                 {
                     PermissionID = p.PermissionID,
-                    TenHienThi = p.TenHienThi,
-                    MaPermission = p.MaPermission,
+                    PermissionName = p.PermissionName,
+                    PermissionCode = p.PermissionCode,
                     Module = p.Module,
-                    Description = p.description
+                    Description = p.Description,
+                    IsDeleted = p.IsDeleted,
+                    CreatedAt = p.CreatedAt,
                 }).ToListAsync();
 
                 return result;
@@ -51,9 +53,9 @@ namespace Student_management.Services
             {
                 var permission = new Permission
                 {
-                    TenHienThi = dto.TenHienThi,
+                    PermissionName = dto.PermissionName,
                     Module = dto.Module,
-                    description = dto.description
+                    Description = dto.Description
                 };
 
                 _context.Permissions.Add(permission);
@@ -62,10 +64,10 @@ namespace Student_management.Services
                 return new PermissionDto
                 {
                     PermissionID = permission.PermissionID,
-                    TenHienThi = permission.TenHienThi,
-                    MaPermission = permission.MaPermission,
+                    PermissionName = permission.PermissionName,
+                    PermissionCode = permission.PermissionCode,
                     Module = permission.Module,
-                    Description = permission.description
+                    Description = permission.Description
                 };
             }
             catch (Exception ex)

@@ -25,7 +25,6 @@ namespace Student_management.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Cấu hình mối quan hệ Account - Teacher (1-0 hoặc 1-1)
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Account)
                 .WithOne(a => a.Teacher)
@@ -33,7 +32,6 @@ namespace Student_management.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Cấu hình mối quan hệ Account - Student (1-0 hoặc 1-1)
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Account)
                 .WithOne(a => a.Student)
@@ -41,21 +39,22 @@ namespace Student_management.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Cấu hình mối quan hệ Account - Role (Many-to-One)
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Role)
-                .WithMany()
+                .WithMany(r => r.Accounts)
                 .HasForeignKey(a => a.RoleID)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Cấu hình mối quan hệ Role - Permission (Many-to-Many)
+            modelBuilder.Entity<Account>()
+                .ToTable(tb => tb.HasTrigger("Account_Trigger"));
+
             modelBuilder.Entity<RolePermission>()
                 .HasKey(rp => rp.RolePermissionID);
 
             modelBuilder.Entity<RolePermission>()
                 .HasOne(rp => rp.Role)
-                .WithMany()
+                .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.RoleID)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -65,36 +64,31 @@ namespace Student_management.Data
                 .HasForeignKey(rp => rp.PermissionID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Cấu hình Teacher - Department
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Department)
                 .WithMany()
                 .HasForeignKey(t => t.DepartmentID)
                 .IsRequired(false);
 
-            // Cấu hình Student - Class
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Class)
                 .WithMany()
                 .HasForeignKey(s => s.ClassID)
                 .IsRequired(false);
 
-            // Cấu hình Class - Department
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Department)
                 .WithMany()
                 .HasForeignKey(c => c.DepartmentID)
                 .IsRequired(false);
 
-            // Cấu hình Class - Teacher (GVCN)
             modelBuilder.Entity<Class>()
-                .HasOne(c => c.TeacherGVCN)
+                .HasOne(c => c.Teacher)
                 .WithMany()
-                .HasForeignKey(c => c.TeacherID_GVCN)
+                .HasForeignKey(c => c.TeacherID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Đặt tên bảng
             modelBuilder.Entity<Class>().ToTable("Class");
             modelBuilder.Entity<RolePermission>().ToTable("Role_Permission");
 

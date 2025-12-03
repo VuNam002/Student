@@ -1,24 +1,25 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_management.Models
+[Table("RolePermission")]
+public class RolePermission
 {
-    [Table("Role_Permission")]
-    public class RolePermission
-    {
-        [Key]
-        public int RolePermissionID { get; set; }
+    [Key]
+    public int RolePermissionID { get; set; }
 
-        [Required]
-        public int RoleID { get; set; }
+    [Required]
+    public int RoleID { get; set; }
 
-        [Required]
-        public int PermissionID { get; set; }
+    [Required]
+    public int PermissionID { get; set; }
 
-        [ForeignKey("RoleID")]
-        public Role? Role { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("PermissionID")]
-        public Permission? Permission { get; set; }
-    }
+    [ForeignKey("RoleID")]
+    public Role? Role { get; set; }
+
+    [ForeignKey("PermissionID")]
+    public Permission? Permission { get; set; }
 }

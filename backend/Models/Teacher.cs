@@ -1,34 +1,46 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Student_management.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_management.Models
+[Table("Teacher")]
+public class Teacher
 {
-    [Table("Teacher")]
-    public class Teacher
-    {
-        [Key]
-        public int TeacherID { get; set; }
+    [Key]
+    public int TeacherID { get; set; }
 
-        [Required]
-        [StringLength(20)]
-        public string ?MaGV { get; set; }
+    [Required]
+    public int PersonID { get; set; } 
 
-        [Required]
-        [StringLength(100)]
-        public string? HoTen { get; set; }
+    [Required]
+    [StringLength(20)]
+    public string? TeacherCode { get; set; } 
 
-        [StringLength(100)]
-        public string? Email { get; set; }
+    public int? DepartmentID { get; set; }
 
-        public int? DepartmentID { get; set; }
+    [StringLength(50)]
+    public string? Position { get; set; }
 
-        public int? AccountID { get; set; }
+    [StringLength(50)]
+    public string? Degree { get; set; }
 
-        // Navigation Properties
-        [ForeignKey("DepartmentID")]
-        public Department? Department { get; set; }
+    [StringLength(100)]
+    public string? Specialization { get; set; }
 
-        [ForeignKey("AccountID")]
-        public Account? Account { get; set; }
-    }
+    public int? AccountID { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+    [ForeignKey("PersonID")]
+    public Person? Person { get; set; } 
+
+    [ForeignKey("DepartmentID")]
+    public Department? Department { get; set; }
+
+    [ForeignKey("AccountID")]
+    public Account? Account { get; set; }
+
+    // Reverse Navigation
+    public ICollection<Class>? Classes { get; set; } 
 }
