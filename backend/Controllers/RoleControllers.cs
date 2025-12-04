@@ -63,5 +63,81 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RoleDto>> Detail(int id)
+        {
+            try
+            {
+                var role = await _roleService.Detail(id);
+                if (role == null)
+                {
+                    return NotFound("Role not found.");
+                }
+                return Ok(role);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving role by ID {id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpPost]
+        public async Task<ActionResult<RoleDto>> Create([FromBody] CreateRole dto)
+        {
+            try
+            {
+                var role = await _roleService.CreateRole(dto);
+                return CreatedAtAction(nameof(Detail), new { id = role.RoleID }, role);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating role");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RoleDto>> Update(int id, [FromBody] CreateRole dto)
+        {
+            try
+            {
+                var role = await _roleService.UpdateRole(id, dto);
+                if (role == null)
+                {
+                    return NotFound("Role not found.");
+                }
+                return Ok(role);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating role {id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var result = await _roleService.DeleteRole(id);
+                if (!result)
+                {
+                    return NotFound("Role not found.");
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting role {id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }
