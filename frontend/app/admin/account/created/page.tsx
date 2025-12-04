@@ -122,11 +122,11 @@ export default function AdminAccountCreatePage() {
       Email: formData.email,
       RoleID: formData.roleID,
       Avatar: formData.avatar,
-      TrangThai: Number(formData.trangThai),
-      TenHienThi: formData.tenHienThi,
-      HoTen: formData.hoTen,
-      SDT: formData.sdt,
-      MatKhau: formData.matKhau,
+      Status: Number(formData.trangThai),
+      RoleName: formData.tenHienThi,
+      FullName: formData.hoTen,
+      PhoneNumber: formData.sdt,
+      Password: formData.matKhau,
     };
 
     try {

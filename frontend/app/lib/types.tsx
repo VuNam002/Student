@@ -14,6 +14,7 @@ export interface AccountDetail {
   CreatedAt?: string | null;
   FullName?: string | null;
   PhoneNumber?: string | null;
+  Password?: string;
 }
 
 export interface AccountDto {
@@ -26,6 +27,7 @@ export interface AccountDto {
   FullName: string | null;
   CreatedAt: string;
   PhoneNumber: string | null;
+  IsDeleted: boolean;
 }
 
 export interface Pagination {

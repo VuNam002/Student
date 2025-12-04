@@ -1,4 +1,3 @@
-import { Avatar } from "@radix-ui/react-avatar";
 import { LoginResponse, AccountDetail } from "./types";
 
 const API_URL = 'http://localhost:5262/api';
@@ -40,7 +39,6 @@ async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
     return response.text() as Promise<T>;
 }
 
-
 export async function fetchlogin(Email: string, Password: string): Promise<LoginResponse> {
     try {
         const token = await api<string>(`${API_URL}/Account/login`, {
@@ -72,7 +70,13 @@ export async function fetchUserFromToken(): Promise<AccountDetail | null> {
     }
 }
 
-export async function fetchAccount(Page: number = 1, pageSize: number = 5, Keyword: string = '', Status?: boolean) {
+
+export async function fetchAccount(
+    Page: number = 1, 
+    pageSize: number = 5, 
+    Keyword: string = '', 
+    Status?: boolean
+) {
     const params = new URLSearchParams({
         page: Page.toString(),
         pageSize: pageSize.toString(),
@@ -148,14 +152,16 @@ export async function fetchAccountCreat(newAccount: any) {
     }
 }
 
+// ✅ SỬA ĐÂY - Đổi từ PATCH sang DELETE
 export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
     try {
+        // ✅ ĐÚNG - Dùng DELETE, backend đã xử lý soft delete
         await api<any>(`${API_URL}/Account/${id}`, {
             method: 'DELETE',
         });
         return true;
     } catch (error) {
-        console.error('Delete item API error:', error);
+        console.error('Delete account API error:', error);
         return null;
     }
 }
