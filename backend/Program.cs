@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// C?u hình Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -30,7 +29,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// C?u hình Authorization
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
@@ -55,9 +53,8 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<PermissionService>();
-builder.Services.AddScoped<PermissionService>();
-
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

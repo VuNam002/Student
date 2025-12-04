@@ -4,6 +4,6 @@ namespace Student_management.Services
 {
     public interface IRoleService
     {
-        Task<bool> AssignPermissionsToRoleAsync(int roleId, List<int> permissionIds);
+        Task<List<RoleDto>> GetAll();
     }
 }

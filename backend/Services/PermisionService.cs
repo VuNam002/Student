@@ -5,7 +5,7 @@ using Student_management.Models;
 
 namespace Student_management.Services
 {
-    public class PermissionService
+    public class PermissionService : IPermissionService
     {
         private readonly AppDbContext _context;
         private readonly ILogger<PermissionService> _logger;
@@ -106,38 +106,29 @@ namespace Student_management.Services
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Kiểm tra role tồn tại
                 var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == roleId);
                 if (!roleExists)
                 {
                     _logger.LogWarning("Role not found with ID: {roleId}", roleId);
                     return false;
                 }
-
-                // Xóa permissions cũ
                 var existingPermissions = await _context.RolePermissions
                     .Where(rp => rp.RoleID == roleId)
                     .ToListAsync();
-
                 if (existingPermissions.Any())
                 {
                     _context.RolePermissions.RemoveRange(existingPermissions);
                 }
-
-                // Validate và lấy permissions hợp lệ
                 var validPermissionIds = await _context.Permissions
                     .Where(p => permissionIds.Contains(p.PermissionID))
                     .Select(p => p.PermissionID)
                     .ToListAsync();
-
                 if (!validPermissionIds.Any())
                 {
                     _logger.LogWarning("No valid permissions found for role {roleId}", roleId);
                     await transaction.RollbackAsync();
                     return false;
                 }
-
-                // Thêm permissions mới
                 var newRolePermissions = validPermissionIds.Select(permissionId => new RolePermission
                 {
                     RoleID = roleId,

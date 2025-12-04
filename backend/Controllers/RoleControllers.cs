@@ -1,19 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Permission;
+using Student_management.DTOs.Role;
 using Student_management.Services;
 
 namespace Student_management.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RoleControllers : ControllerBase
+    public class RoleController : ControllerBase
     {
-        private readonly PermissionService _permissionService;
-        private readonly ILogger<RoleControllers> _logger;
+        private readonly IPermissionService _permissionService;
+        private readonly IRoleService _roleService;
+        private readonly ILogger<RoleController> _logger;
 
-        public RoleControllers(PermissionService permissionService, ILogger<RoleControllers> logger)
+        public RoleController(
+            IPermissionService permissionService,
+            IRoleService roleService,
+            ILogger<RoleController> logger)
         {
             _permissionService = permissionService;
+            _roleService = roleService;
             _logger = logger;
         }
 
@@ -27,7 +33,6 @@ namespace Student_management.Controllers
 
             try
             {
-                // Giả sử hàm này nằm trong PermissionService
                 var result = await _permissionService.AssignPermissionToRoleDto(roleId, dto.PermissionIds);
 
                 if (!result)
@@ -41,6 +46,21 @@ namespace Student_management.Controllers
             {
                 _logger.LogError(ex, "Error assigning permissions to role {roleId}", roleId);
                 return StatusCode(500, "An internal server error occurred.");
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<RoleDto>>> GetAll()
+        {
+            try
+            {
+                var roles = await _roleService.GetAll();
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving roles");
+                return StatusCode(500, "Internal server error");
             }
         }
     }
