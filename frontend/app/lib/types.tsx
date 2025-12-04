@@ -36,3 +36,18 @@ export interface Pagination {
   pageNumber: number;
   pageSize: number;
 }
+
+export interface RoleDto {
+  RoleID: number;
+  RoleCode: string;
+  RoleName: string;
+  Description: string;
+  IsDeleted: boolean;
+  CreatedAt: string;
+}
+
+export interface RolePermissionDto {
+  roleId: number;
+  permissionId: number;
+}
+

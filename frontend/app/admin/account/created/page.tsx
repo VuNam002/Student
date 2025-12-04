@@ -215,7 +215,7 @@ export default function AdminAccountCreatePage() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 w-1/2">
               <label htmlFor="matKhau" className="font-medium">
                 Mật khẩu <span className="text-red-500">*</span>
               </label>

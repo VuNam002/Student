@@ -59,11 +59,11 @@ const navMain = [
     items: [
       {
         title: "Danh sách quyền",
-        url: "#",
+        url: "/admin/role",
       },
       {
         title: "Thêm quyền",
-        url: "#",
+        url: "/admin/role/created",
       },
       {
         title: "Tutorials",

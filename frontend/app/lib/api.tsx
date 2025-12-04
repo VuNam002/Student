@@ -198,3 +198,106 @@ export async function logout() {
         window.location.href = '/login';
     }
 }
+
+export async function fetchRole() {
+    try {
+        const res = await fetch(`${API_URL}/Role`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        method: 'GET' 
+    });
+    if(!res.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const data = await res.json();
+    return data;
+    } catch (error) {
+        console.error('Fetch role API error:', error);
+        return null;
+    }
+}
+
+export async function fetchRoleById(id: number) {
+    try {
+        const res = await fetch(`${API_URL}/Role/${id}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        method: 'GET'
+    });
+    if(!res.ok) {
+        throw new Error('Network response was not ok');
+    }
+    const data = await res.json();
+    return data;
+    } catch (error) {
+        console.error('Fetch role by ID API error:', error);
+        return null;
+    }
+}
+
+export async function fetchRoleCreate(newRole: any) {
+    try {
+        return await api<any>(`${API_URL}/Role/create`, {
+            method: 'POST',
+            body: JSON.stringify(newRole)
+        });
+    } catch (error) {
+        console.error('Fetch role create API error:', error);
+        return null;
+    }
+}
+
+export async function fetchRoleEdit(id: number, updateRole: any) {
+    try {
+        return await api<any>(`${API_URL}/Role/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(updateRole)
+        });
+    } catch (error) {
+        console.error('Fetch role edit API error:', error);
+        return null;
+    }
+}
+
+export async function fetchRoleDeleted(id: number): Promise<boolean | null> {
+    try {
+        await api<any>(`${API_URL}/Role/${id}`, {
+            method: 'DELETE',
+        });
+        return true;
+    } catch (error) {
+        console.error('Delete role API error:', error);
+        return null;
+    }
+}
+
+export async function fetchRolePermissions(roleId: number, permissions: number[]) {
+    try {
+        return await api<any>(`${API_URL}/Role/${roleId}/permissions`, {
+            method: 'PUT',
+            body: JSON.stringify(permissions)
+        });
+    } catch (error) {
+        console.error('Fetch role permissions API error:', error);
+        return null;
+    }
+}
+
+export async function fetchDetailRole(roleId: number) {
+    try {
+        return await api<any>(`${API_URL}/Role/${roleId}`, {
+            method: 'GET',
+        });
+    } catch (error) {
+        console.error('Fetch detail role API error:', error);
+        return null;
+    }
+}
+
+export async function fetchPermissions(params:type) {
+    
+}
