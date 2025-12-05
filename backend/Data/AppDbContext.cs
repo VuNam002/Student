@@ -49,18 +49,15 @@ namespace Student_management.Data
             modelBuilder.Entity<Account>()
                 .ToTable(tb => tb.HasTrigger("Account_Trigger"));
 
-            // ✅ ĐÚNG - Config RolePermission
             modelBuilder.Entity<RolePermission>(entity =>
             {
                 entity.HasKey(rp => rp.RolePermissionID);
 
-                // Relationship với Role
                 entity.HasOne(rp => rp.Role)
                     .WithMany(r => r.RolePermissions)
                     .HasForeignKey(rp => rp.RoleID)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Relationship với Permission
                 entity.HasOne(rp => rp.Permission)
                     .WithMany(p => p.RolePermissions)
                     .HasForeignKey(rp => rp.PermissionID)

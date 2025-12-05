@@ -99,7 +99,7 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<RoleDto>> Update(int id, [FromBody] CreateRole dto)
         {
             try

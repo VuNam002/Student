@@ -34,10 +34,7 @@ public class Account
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-
-    [ForeignKey("RoleID")]
     public Role? Role { get; set; }
-
     public Teacher? Teacher { get; set; }
     public Student? Student { get; set; }
 }

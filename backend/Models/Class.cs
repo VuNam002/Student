@@ -28,11 +28,7 @@ public class Class
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    [ForeignKey("DepartmentID")]
     public Department? Department { get; set; }
-
-    [ForeignKey("TeacherID")]
     public Teacher? Teacher { get; set; }
-
     public ICollection<Student>? Students { get; set; }
 }

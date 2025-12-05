@@ -37,6 +37,7 @@ namespace Student_management.Services
             {
                 return await _context.Accounts
                     .AsNoTracking()//tat co che theo doi
+                    .Where(a => !a.IsDeleted == true)
                     .Include(a => a.Role)
                     .Select(a => new AccountDto
                     {
@@ -137,7 +138,7 @@ namespace Student_management.Services
             {
                 var account = await _context.Accounts
                     .Include(a => a.Role)
-                    .Where(a => a.AccountID == id)
+                    .Where(a => a.AccountID == id && a.IsDeleted == false)
                     .Select(a => new AccountDto
                     {
                         ID = a.AccountID,
@@ -222,7 +223,7 @@ namespace Student_management.Services
         {
             try
             {
-                var account = await _context.Accounts.FindAsync(id);
+                var account = await _context.Accounts.Where(a => a.AccountID == id && a.IsDeleted == false).FirstOrDefaultAsync();
                 if (account == null)
                     throw new KeyNotFoundException($"Tai khoan moi voi ID {id} khong ton tai.");
 
@@ -244,6 +245,7 @@ namespace Student_management.Services
                 account.Status = dto.Status;
                 account.FullName = dto.FullName ?? account.FullName;
                 account.PhoneNumber = dto.PhoneNumber ?? account.PhoneNumber;
+                account.UpdatedAt = DateTime.Now;
                 if (dto.CreatedAt != default) account.CreatedAt = dto.CreatedAt;
 
                 await _context.SaveChangesAsync();
@@ -283,6 +285,7 @@ namespace Student_management.Services
                     return false;
                 }
                 account.IsDeleted = true;
+                account.UpdatedAt = DateTime.Now;
                 _context.Accounts.Update(account);
                 await _context.SaveChangesAsync();
                 return true;
@@ -298,7 +301,7 @@ namespace Student_management.Services
         {
             try
             {
-                var query = _context.Accounts.AsNoTracking().Include(a => a.Role).AsQueryable();
+                var query = _context.Accounts.AsNoTracking().Include(a => a.Role).Where(a => a.IsDeleted == false).AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(searchParams.Keyword))
                 {

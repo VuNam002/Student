@@ -17,9 +17,6 @@ public class RolePermission
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    [ForeignKey("RoleID")]
     public Role? Role { get; set; }
-
-    [ForeignKey("PermissionID")]
     public Permission? Permission { get; set; }
 }

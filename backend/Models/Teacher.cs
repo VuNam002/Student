@@ -32,13 +32,8 @@ public class Teacher
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    [ForeignKey("PersonID")]
     public Person? Person { get; set; } 
-
-    [ForeignKey("DepartmentID")]
     public Department? Department { get; set; }
-
-    [ForeignKey("AccountID")]
     public Account? Account { get; set; }
 
     // Reverse Navigation

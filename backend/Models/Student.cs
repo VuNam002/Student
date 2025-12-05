@@ -32,12 +32,7 @@ public class Student
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    [ForeignKey("PersonID")]
     public Person? Person { get; set; } 
-
-    [ForeignKey("ClassID")]
     public Class? Class { get; set; }
-
-    [ForeignKey("AccountID")]
     public Account? Account { get; set; }
 }
