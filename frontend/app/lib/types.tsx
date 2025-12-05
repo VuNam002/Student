@@ -51,3 +51,13 @@ export interface RolePermissionDto {
   permissionId: number;
 }
 
+export interface PermissionDto {
+  PermissionID: number;
+  PermissionCode: string;
+  PermissionName: string;
+  Module: string;
+  Description: string;
+  IsDeleted: boolean;
+  CreatedAt: string;
+  UpdatedAt: string;
+}

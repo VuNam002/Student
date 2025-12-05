@@ -298,6 +298,26 @@ export async function fetchDetailRole(roleId: number) {
     }
 }
 
-export async function fetchPermissions(params:type) {
-    
+export async function fetchPermissions(roleId: number): Promise<any[] | null> {
+    try {
+        const url = `${API_URL}/Role/${roleId}/permissions`;
+        return await api<any[]>(url, { method: 'GET' });
+    } catch (error) {
+        console.error(`Fetch permissions for role ${roleId} API error:`, error);
+        return null;
+    }
+}
+
+export async function fetchAllPermissions(module?: string): Promise<any[] | null> {
+    try {
+        const params = new URLSearchParams();
+        if (module) {
+            params.append('module', module);
+        }
+        const url = `${API_URL}/permissions?${params.toString()}`;
+        return await api<any[]>(url, { method: 'GET' });
+    } catch (error) {
+        console.error('Fetch all permissions API error:', error);
+        return null;
+    }
 }

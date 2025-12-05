@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchAccountById, fetchAccountEdit } from '../../../lib/api';
+import { fetchAccountById, fetchAccountEdit, fetchRole } from '../../../lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -43,6 +43,7 @@ function EditAccountForm() {
   const accountId = searchParams.get('id');
 
   const [formData, setFormData] = useState<Partial<FormData>>({});
+  const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,40 +55,66 @@ function EditAccountForm() {
       return;
     }
 
-    const loadAccountData = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchAccountById(Number(accountId));
-        if (data) {
+        const [accountData, rolesData] = await Promise.all([
+          fetchAccountById(Number(accountId)),
+          fetchRole()
+        ]);
+
+        // ✅ DEBUG - Xem data trả về
+        console.log("Account Data:", accountData);
+        console.log("Roles Data:", rolesData);
+
+        if (accountData) {
+          // ✅ Hỗ trợ cả RoleID và roleID
+          const roleId = accountData.RoleID || accountData.roleID || 0;
+          
           setFormData({
-            ID: data.ID,
-            Email: data.Email || '',
-            RoleID: data.RoleID || 0,
-            Avatar: data.Avatar || null,
-            Status: data.Status ?? 0,
-            FullName: data.FullName || '',
-            PhoneNumber: data.PhoneNumber || '',
+            ID: accountData.ID,
+            Email: accountData.Email || '',
+            RoleID: roleId,
+            Avatar: accountData.Avatar || null,
+            Status: accountData.Status ?? 0,
+            FullName: accountData.FullName || '',
+            PhoneNumber: accountData.PhoneNumber || '',
             Password: '',
           });
+
+          console.log("Set FormData with RoleID:", roleId);
         } else {
           setError("Không thể tải dữ liệu tài khoản.");
         }
+
+        if (rolesData && Array.isArray(rolesData)) {
+          console.log("Setting roles:", rolesData);
+          setRoles(rolesData);
+        } else {
+          console.warn("Roles data is invalid:", rolesData);
+          setRoles([]);
+        }
+
       } catch (err) {
         setError("Đã xảy ra lỗi khi tải dữ liệu.");
-        console.error(err);
+        console.error("Load data error:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadAccountData();
+    loadData();
   }, [accountId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    const newValue = name === 'Status' || name === 'RoleID' ? Number(value) : value;
+    
+    console.log(`Field changed: ${name} = ${newValue} (type: ${typeof newValue})`);
+    
     setFormData(prev => ({ 
       ...prev, 
-      [name]: name === 'Status' || name === 'RoleID' ? Number(value) : value 
+      [name]: newValue
     }));
   };
 
@@ -128,6 +155,12 @@ function EditAccountForm() {
     e.preventDefault();
     if (!accountId || !formData.ID) return;
 
+    // ✅ Validation RoleID
+    if (!formData.RoleID || formData.RoleID === 0) {
+      alert("Vui lòng chọn vai trò hợp lệ!");
+      return;
+    }
+
     const payload: any = {
       Email: formData.Email,
       RoleID: Number(formData.RoleID),
@@ -140,6 +173,11 @@ function EditAccountForm() {
     if (formData.Password && formData.Password.trim() !== '') {
       payload.Password = formData.Password;
     }
+
+    // ✅ DEBUG - Xem payload trước khi gửi
+    console.log("=== SUBMIT DEBUG ===");
+    console.log("FormData:", formData);
+    console.log("Payload to send:", payload);
 
     try {
       const result = await fetchAccountEdit(Number(accountId), payload);
@@ -156,7 +194,11 @@ function EditAccountForm() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div></div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (error) {
@@ -189,14 +231,34 @@ function EditAccountForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="RoleID" className="font-medium">Role ID</label>
-                  <Input 
-                    id="RoleID" 
-                    name="RoleID" 
-                    type="number"
-                    value={formData.RoleID || ''} 
-                    onChange={handleChange} 
-                  />
+                  <label htmlFor="RoleID" className="font-medium">
+                    Vai trò {roles.length === 0 && <span className="text-red-500 text-sm">(Không có dữ liệu)</span>}
+                  </label>
+                  <select
+                    id="RoleID"
+                    name="RoleID"
+                    value={formData.RoleID || ''}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="" disabled>Chọn một vai trò</option>
+                    {roles && roles.length > 0 ? (
+                      roles.map(role => {
+                        // ✅ Hỗ trợ nhiều cách đặt tên key
+                        const id = role.roleID || role.RoleID || role.id;
+                        const name = role.roleName || role.RoleName || role.name || 'Unknown Role';
+                        
+                        return (
+                          <option key={id} value={id}>
+                            {name}
+                          </option>
+                        );
+                      })
+                    ) : (
+                      <option disabled>Không có vai trò nào</option>
+                    )}
+                  </select>
                 </div>
               </div>
 
@@ -208,7 +270,8 @@ function EditAccountForm() {
                     name="Email" 
                     type="email" 
                     value={formData.Email || ''} 
-                    onChange={handleChange} 
+                    onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -242,7 +305,7 @@ function EditAccountForm() {
                     name="Status"
                     value={formData.Status ?? 0}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {Object.entries(statusConfig).map(([key, { label }]) => (
                       <option key={key} value={key}>{label}</option>
@@ -258,7 +321,7 @@ function EditAccountForm() {
                     <img 
                       src={formData.Avatar} 
                       alt="Avatar" 
-                      className="w-16 h-16 rounded-full object-cover" 
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200" 
                     />
                   )}
                   <Input 
@@ -268,20 +331,23 @@ function EditAccountForm() {
                     onChange={handleImageUpload} 
                     className="hidden" 
                   />
-                  <Button type="button" variant="outline" asChild>
+                  <Button type="button" variant="outline" asChild disabled={isUploading}>
                     <label htmlFor="avatar-upload" className="cursor-pointer">
                       <UploadCloud className="mr-2 h-4 w-4" />
-                      Chọn ảnh
+                      {isUploading ? 'Đang tải...' : 'Chọn ảnh'}
                     </label>
                   </Button>
-                  {isUploading && <div className="text-sm text-gray-500">Đang tải lên...</div>}
                 </div>
               </div>
 
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => router.back()}>Hủy</Button>
-              <Button type="submit">Lưu thay đổi</Button>
+              <Button type="button" variant="outline" onClick={() => router.back()}>
+                Hủy
+              </Button>
+              <Button type="submit">
+                Lưu thay đổi
+              </Button>
             </CardFooter>
           </form>
         </Card>
@@ -292,7 +358,11 @@ function EditAccountForm() {
 
 export default function EditAccountPage() {
     return (
-        <Suspense fallback={<div>Đang tải...</div>}>
+        <Suspense fallback={
+          <div className="flex justify-center items-center h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          </div>
+        }>
             <EditAccountForm />
         </Suspense>
     );
