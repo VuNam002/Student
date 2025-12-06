@@ -16,27 +16,32 @@ namespace Student_management.Services
             _logger = logger;
         }
 
-        public async Task<List<PermissionDto>> GetAllPermissions(string? module = null)
+        public async Task<List<PermissionGroupDto>> GetAllPermissionsGrouped(string? module = null)
         {
             try
             {
-                var query = _context.Permissions.AsQueryable();
+                var query = _context.Permissions.AsNoTracking().Where(p => !p.IsDeleted);
 
                 if (!string.IsNullOrWhiteSpace(module))
                 {
                     query = query.Where(p => p.Module == module);
                 }
 
-                var result = await query.Select(p => new PermissionDto
-                {
-                    PermissionID = p.PermissionID,
-                    PermissionName = p.PermissionName,
-                    PermissionCode = p.PermissionCode,
-                    Module = p.Module,
-                    Description = p.Description,
-                    IsDeleted = p.IsDeleted,
-                    CreatedAt = p.CreatedAt,
-                }).ToListAsync();
+                var flatList = await query.ToListAsync();
+
+                var result = flatList
+                    .GroupBy(p => p.Module)
+                    .Select(g => new PermissionGroupDto
+                    {
+                        Module = string.IsNullOrEmpty(g.Key) ? "DefaultModule" : g.Key,
+                        Permissions = g.Select(p => new PermissionItemDto
+                        {
+                            PermissionID = p.PermissionID,
+                            PermissionName = p.PermissionName,
+                            PermissionCode = p.PermissionCode,
+                            Description = p.Description
+                        }).ToList()
+                    }).ToList();
 
                 return result;
             }
@@ -55,7 +60,8 @@ namespace Student_management.Services
                 {
                     PermissionName = dto.PermissionName,
                     Module = dto.Module,
-                    Description = dto.Description
+                    Description = dto.Description,
+                    PermissionCode = dto.PermissionCode,
                 };
 
                 _context.Permissions.Add(permission);

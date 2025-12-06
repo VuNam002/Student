@@ -120,7 +120,7 @@ namespace Student_management.Services
                     new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()), 
                     new Claim(ClaimTypes.Name, account.Email ?? string.Empty)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(10),
+                Expires = DateTime.UtcNow.AddMinutes(60),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(

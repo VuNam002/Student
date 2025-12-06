@@ -21,11 +21,11 @@ namespace Student_management.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PermissionDto>>> GetAllPermissionDto([FromQuery] string? module = null)
+        public async Task<ActionResult<List<PermissionDto>>> GetAllPermissionsGrouped([FromQuery] string? module = null)
         {
             try
             {
-                var permision = await _permissionService.GetAllPermissions(module);
+                var permision = await _permissionService.GetAllPermissionsGrouped(module);
                 return Ok(permision);
             }
             catch (Exception ex)
