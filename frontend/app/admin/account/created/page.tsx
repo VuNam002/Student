@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ArrowLeft, UploadCloud } from 'lucide-react';
-import { fetchAccountCreat } from '@/app/lib/api';
+import { fetchAccountCreat, fetchRole } from '@/app/lib/api';
+import { RoleDto } from '@/app/lib/types';
 
 const statusConfig = {
   0: { label: "Chờ kích hoạt" },
@@ -18,32 +19,44 @@ const statusConfig = {
 };
 
 interface FormData {
-  email: string;
-  roleID: string;
-  avatar: string;
-  trangThai: number;
-  tenHienThi: string;
-  hoTen: string;
-  sdt: string;
-  matKhau: string;
+  Email: string;
+  RoleID: string;
+  Avatar: string;
+  Status: number;
+  FullName: string;
+  PhoneNumber: string;
+  Password: string;
 }
 
 export default function AdminAccountCreatePage() {
   const router = useRouter();
+  const [roles, setRoles] = useState<RoleDto[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    roleID: '',
-    avatar: '',
-    trangThai: 0,
-    tenHienThi: '',
-    hoTen: '',
-    sdt: '',
-    matKhau: '',
+    Email: '',
+    RoleID: '',
+    Avatar: '',
+    Status: 0,
+    FullName: '',
+    PhoneNumber: '',
+    Password: '',
   });
 
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+
+  useEffect(() => {
+    const getRoles = async () => {
+      const rolesData = await fetchRole();
+      if (rolesData) {
+        setRoles(rolesData);
+        if (rolesData.length > 0) {
+          setFormData(prev => ({ ...prev, RoleID: rolesData[0].RoleID.toString() }));
+        }
+      }
+    };
+    getRoles();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -73,7 +86,7 @@ export default function AdminAccountCreatePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({ ...prev, avatar: data.secure_url }));
+        setFormData(prev => ({ ...prev, Avatar: data.secure_url }));
         alert("Tải ảnh lên thành công!");
       } else {
         throw new Error('Tải ảnh lên thất bại.');
@@ -89,24 +102,24 @@ export default function AdminAccountCreatePage() {
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
-    if (!formData.hoTen.trim()) {
-      newErrors.hoTen = "Họ và tên là bắt buộc";
+    if (!formData.FullName.trim()) {
+      newErrors.FullName = "Họ và tên là bắt buộc";
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email là bắt buộc";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+    if (!formData.Email.trim()) {
+      newErrors.Email = "Email là bắt buộc";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email)) {
+      newErrors.Email = "Email không hợp lệ";
     }
 
-    if (!formData.matKhau) {
-      newErrors.matKhau = "Mật khẩu là bắt buộc";
-    } else if (formData.matKhau.length < 6) {
-      newErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
+    if (!formData.Password) {
+      newErrors.Password = "Mật khẩu là bắt buộc";
+    } else if (formData.Password.length < 6) {
+      newErrors.Password = "Mật khẩu phải có ít nhất 6 ký tự";
     }
 
-    if (!formData.tenHienThi.trim()) {
-      newErrors.tenHienThi = "Tên hiển thị là bắt buộc";
+    if (!formData.RoleID) {
+        newErrors.RoleID = "Vai trò là bắt buộc";
     }
 
     setErrors(newErrors);
@@ -119,14 +132,13 @@ export default function AdminAccountCreatePage() {
     }
 
     const payload = {
-      Email: formData.email,
-      RoleID: formData.roleID,
-      Avatar: formData.avatar,
-      Status: Number(formData.trangThai),
-      RoleName: formData.tenHienThi,
-      FullName: formData.hoTen,
-      PhoneNumber: formData.sdt,
-      Password: formData.matKhau,
+      Email: formData.Email,
+      RoleID: parseInt(formData.RoleID),
+      Avatar: formData.Avatar,
+      Status: Number(formData.Status),
+      FullName: formData.FullName,
+      PhoneNumber: formData.PhoneNumber,
+      Password: formData.Password,
     };
 
     try {
@@ -160,95 +172,88 @@ export default function AdminAccountCreatePage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="hoTen" className="font-medium">
+                <label htmlFor="FullName" className="font-medium">
                   Họ và Tên <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  id="hoTen"
-                  name="hoTen"
-                  value={formData.hoTen}
+                  id="FullName"
+                  name="FullName"
+                  value={formData.FullName}
                   onChange={handleChange}
-                  className={errors.hoTen ? 'border-red-500' : ''}
+                  className={errors.FullName ? 'border-red-500' : ''}
                 />
-                {errors.hoTen && <p className="text-red-500 text-sm">{errors.hoTen}</p>}
+                {errors.FullName && <p className="text-red-500 text-sm">{errors.FullName}</p>}
               </div>
               <div className="space-y-2">
-                <label htmlFor="tenHienThi" className="font-medium">
-                  Tên hiển thị <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  id="tenHienThi"
-                  name="tenHienThi"
-                  value={formData.tenHienThi}
-                  onChange={handleChange}
-                  className={errors.tenHienThi ? 'border-red-500' : ''}
-                />
-                {errors.tenHienThi && <p className="text-red-500 text-sm">{errors.tenHienThi}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="email" className="font-medium">
+                <label htmlFor="Email" className="font-medium">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  id="email"
-                  name="email"
+                  id="Email"
+                  name="Email"
                   type="email"
-                  value={formData.email}
+                  value={formData.Email}
                   onChange={handleChange}
-                  className={errors.email ? 'border-red-500' : ''}
+                  className={errors.Email ? 'border-red-500' : ''}
                   autoComplete="off"
                 />
-                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="sdt" className="font-medium">Số điện thoại</label>
-                <Input
-                  id="sdt"
-                  name="sdt"
-                  value={formData.sdt}
-                  onChange={handleChange}
-                  autoComplete="off"
-                />
+                {errors.Email && <p className="text-red-500 text-sm">{errors.Email}</p>}
               </div>
             </div>
 
-            <div className="space-y-2 w-1/2">
-              <label htmlFor="matKhau" className="font-medium">
-                Mật khẩu <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="matKhau"
-                name="matKhau"
-                type="password"
-                value={formData.matKhau}
-                onChange={handleChange}
-                className={errors.matKhau ? 'border-red-500' : ''}
-                placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
-                autoComplete="new-password"
-              />
-              {errors.matKhau && <p className="text-red-500 text-sm">{errors.matKhau}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="space-y-2">
+                <label htmlFor="PhoneNumber" className="font-medium">Số điện thoại</label>
+                <Input
+                  id="PhoneNumber"
+                  name="PhoneNumber"
+                  value={formData.PhoneNumber}
+                  onChange={handleChange}
+                  autoComplete="off"
+                />
+              </div>
+               <div className="space-y-2">
+                <label htmlFor="Password" className="font-medium">
+                  Mật khẩu <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="Password"
+                  name="Password"
+                  type="password"
+                  value={formData.Password}
+                  onChange={handleChange}
+                  className={errors.Password ? 'border-red-500' : ''}
+                  placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                  autoComplete="new-password"
+                />
+                {errors.Password && <p className="text-red-500 text-sm">{errors.Password}</p>}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="roleID" className="font-medium">Vai trò</label>
-                <Input
-                  id="roleID"
-                  name="roleID"
-                  value={formData.roleID}
+                <label htmlFor="RoleID" className="font-medium">Vai trò</label>
+                <select
+                  id="RoleID"
+                  name="RoleID"
+                  value={formData.RoleID}
                   onChange={handleChange}
-                  placeholder="Nhập ID vai trò"
-                />
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="" disabled>Chọn vai trò</option>
+                  {roles.map(role => (
+                    <option key={role.RoleID} value={role.RoleID}>{role.RoleName}</option>
+                  ))}
+                </select>
+                 {errors.RoleID && <p className="text-red-500 text-sm">{errors.RoleID}</p>}
               </div>
               <div className="space-y-2">
-                <label htmlFor="trangThai" className="font-medium">Trạng thái</label>
+                <label htmlFor="Status" className="font-medium">Trạng thái</label>
                 <select
-                  id="trangThai"
-                  name="trangThai"
-                  value={formData.trangThai}
+                  id="Status"
+                  name="Status"
+                  value={formData.Status}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                 >
@@ -262,9 +267,9 @@ export default function AdminAccountCreatePage() {
             <div className="space-y-2">
               <label className="font-medium">Avatar</label>
               <div className="flex items-center gap-4">
-                {formData.avatar && (
+                {formData.Avatar && (
                   <img
-                    src={formData.avatar}
+                    src={formData.Avatar}
                     alt="Avatar preview"
                     className="w-16 h-16 rounded-full object-cover"
                   />

@@ -66,12 +66,12 @@ const navMain = [
         url: "/admin/role/created",
       },
       {
-        title: "Tutorials",
-        url: "#",
+        title: "Phân quyền",
+        url: "/admin/permission",
       },
       {
-        title: "Changelog",
-        url: "#",
+        title: "Thêm phân quyền",
+        url: "/admin/permission/created",
       },
     ],
   },
@@ -169,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {loading ? (
           <div>Loading...</div>
         ) : user ? (
-          <NavUser user={{ name: user.TenHienThi??null, email: user.Email, avatar: user.Avatar ?? null }} />
+          <NavUser user={{ name: user.RoleName??null, email: user.Email, avatar: user.Avatar ?? null }} />
         ) : (
           <div>No user</div>
         )}

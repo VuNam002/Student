@@ -44,6 +44,7 @@ export interface RoleDto {
   Description: string;
   IsDeleted: boolean;
   CreatedAt: string;
+  permissions?: PermissionDto[];  
 }
 
 export interface RolePermissionDto {
@@ -60,4 +61,16 @@ export interface PermissionDto {
   IsDeleted: boolean;
   CreatedAt: string;
   UpdatedAt: string;
+}
+
+export interface PermissionItemDto {
+  PermissionID: number;
+  PermissionCode: string;
+  PermissionName: string;
+  Description: string | null;
+}
+
+export interface PermissionGroupDto {
+  Module: string;
+  Permissions: PermissionItemDto[];
 }
