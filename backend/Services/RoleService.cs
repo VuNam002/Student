@@ -20,6 +20,7 @@ namespace Student_management.Services
             try
             {
                 return await _context.Roles
+                    .Include(r => r.RolePermissions)
                     .Where(r => r.IsDeleted == false)
                     .Select(r => new RoleDto
                     {
@@ -28,7 +29,8 @@ namespace Student_management.Services
                         RoleCode = r.RoleCode,
                         Description = r.Description,
                         IsDeleted = r.IsDeleted,
-                        CreatedAt = r.CreatedAt
+                        CreatedAt = r.CreatedAt,
+                        PermissionIds = r.RolePermissions != null ? r.RolePermissions.Select(rp => rp.PermissionID).ToList() : new List<int>()
                     })
                     .ToListAsync(); 
             }

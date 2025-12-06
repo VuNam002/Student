@@ -55,6 +55,7 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<PermissionService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
