@@ -1,0 +1,28 @@
+﻿using Student_management.Enum;
+
+namespace Student_management.DTOs.Student
+{
+    public class StudentDto
+    {
+        public int StudentID { get; set; }
+        public string? StudentCode { get; set; }
+        public int PersonID { get; set; }
+        public int ClassID { get; set; }
+        public DateTime? EnrollmentDate { get; set; }
+        public DateTime? GraduationDate { get; set; }
+        public StudentStatus Status { get; set; } = StudentStatus.Active;
+        public int? AccountID { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public string? ClassName { get; set; }
+        public string? FullName { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Address { get; set; }
+        public string? IdentityCard { get; set; }
+        public string? Email { get; set; }
+        public string? Avatar { get; set; }
+    }
+}

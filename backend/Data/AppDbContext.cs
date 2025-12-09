@@ -18,6 +18,7 @@ namespace Student_management.Data
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<Student>Student { get; set; }
 
         protected AppDbContext()
         {
