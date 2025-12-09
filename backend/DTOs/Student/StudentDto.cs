@@ -1,4 +1,5 @@
-﻿using Student_management.Enum;
+﻿using Student_management.DTOs.Person;
+using Student_management.Enum;
 
 namespace Student_management.DTOs.Student
 {
@@ -16,13 +17,6 @@ namespace Student_management.DTOs.Student
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public string? ClassName { get; set; }
-        public string? FullName { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string? Gender { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Address { get; set; }
-        public string? IdentityCard { get; set; }
-        public string? Email { get; set; }
-        public string? Avatar { get; set; }
+        public PersonDto? Person { get; set; }
     }
 }

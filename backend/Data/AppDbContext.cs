@@ -18,7 +18,7 @@ namespace Student_management.Data
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<Student>Student { get; set; }
+        public DbSet<Person> Persons { get; set; }
 
         protected AppDbContext()
         {
@@ -26,6 +26,11 @@ namespace Student_management.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Student>()
+                .Property(s => s.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Account)
                 .WithOne(a => a.Teacher)
@@ -71,27 +76,26 @@ namespace Student_management.Data
                 .HasOne(t => t.Department)
                 .WithMany()
                 .HasForeignKey(t => t.DepartmentID)
-                .IsRequired(false);
-
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Class)
-                .WithMany()
+                .WithMany(c => c.Students) 
                 .HasForeignKey(s => s.ClassID)
-                .IsRequired(false);
-
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Department)
-                .WithMany()
+                .WithMany() 
                 .HasForeignKey(c => c.DepartmentID)
-                .IsRequired(false);
-
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Teacher)
-                .WithMany()
+                .WithMany() 
                 .HasForeignKey(c => c.TeacherID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
-
             modelBuilder.Entity<Class>().ToTable("Class");
 
             base.OnModelCreating(modelBuilder);

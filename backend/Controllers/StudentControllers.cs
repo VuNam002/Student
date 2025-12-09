@@ -36,5 +36,24 @@ namespace Student_management.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateStudent([FromBody] CreateStudent request)
+        {
+            try
+            {
+                if(request == null)
+                {
+                    return BadRequest("Student data is invalid");
+                }
+                var result = await _studentService.CreateStudent(request);
+                return Ok(result);
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating student");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        //[HttpPatch("{id}")]
+        //public async Task<ActionResult> EditStudent(int id, [])
     }
 }
