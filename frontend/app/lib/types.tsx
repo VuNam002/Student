@@ -74,3 +74,17 @@ export interface PermissionGroupDto {
   Module: string;
   Permissions: PermissionItemDto[];
 }
+
+export interface Student {
+  StudentID: number;
+  StudentCode: string;
+  ClassName: string;
+  Status: number;
+  Person: {
+    FullName: string;
+    Email: string;
+    PhoneNumber: string;
+    Gender: string;
+    DateOfBirth: string;
+  };
+}

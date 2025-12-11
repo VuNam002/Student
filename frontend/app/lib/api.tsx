@@ -1,4 +1,4 @@
-import { LoginResponse, AccountDetail, PermissionGroupDto } from "./types";
+import { LoginResponse, AccountDetail, PermissionGroupDto, RoleDto, PermissionDto, Student } from "./types";
 
 const API_URL = "http://localhost:5262/api";
 
@@ -59,9 +59,10 @@ export async function fetchlogin(
       return { token };
     }
     return { message: "Received an empty token." };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Login API error:", error);
-    return { message: error.message || "An unexpected error occurred." };
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    return { message: errorMessage };
   }
 }
 
@@ -99,9 +100,17 @@ export async function fetchAccount(
   const url = `${API_URL}/Account/paginated?${params.toString()}`;
 
   try {
-    const data = await api<any>(url, { method: "GET" });
+    const data = await api<{
+      Account: any[];
+      TotalPages: number;
+      Page: number;
+      TotalCount: number;
+      PageSize: number;
+      HasPrevious: boolean;
+      HasNext: boolean;
+    }>(url, { method: "GET" });
     return {
-      items: data.Account.map((account: any) => ({
+      items: data.Account.map((account) => ({
         ID: account.ID,
         Email: account.Email,
         roleId: account.RoleID,
@@ -125,9 +134,9 @@ export async function fetchAccount(
   }
 }
 
-export async function fetchAccountById(id: number): Promise<any | null> {
+export async function fetchAccountById(id: number): Promise<AccountDetail | null> {
   try {
-    return await api<any>(`${API_URL}/Account/${id}`, { method: "GET" });
+    return await api<AccountDetail>(`${API_URL}/Account/${id}`, { method: "GET" });
   } catch (error) {
     console.error("Fetch account by ID API error:", error);
     return null;
@@ -136,7 +145,7 @@ export async function fetchAccountById(id: number): Promise<any | null> {
 
 export async function fetchAccountEdit(id: number, updateAccount: any) {
   try {
-    return await api<any>(`${API_URL}/Account/${id}`, {
+    return await api<unknown>(`${API_URL}/Account/${id}`, {
       method: "PATCH",
       body: JSON.stringify(updateAccount),
     });
@@ -148,7 +157,7 @@ export async function fetchAccountEdit(id: number, updateAccount: any) {
 
 export async function fetchAccountCreat(newAccount: any) {
   try {
-    return await api<any>(`${API_URL}/Account/create`, {
+    return await api<unknown>(`${API_URL}/Account/create`, {
       method: "POST",
       body: JSON.stringify(newAccount),
     });
@@ -160,7 +169,7 @@ export async function fetchAccountCreat(newAccount: any) {
 
 export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
   try {
-    await api<any>(`${API_URL}/Account/${id}`, {
+    await api<unknown>(`${API_URL}/Account/${id}`, {
       method: "DELETE",
     });
     return true;
@@ -172,7 +181,7 @@ export async function fetchAccountDeleted(id: number): Promise<boolean | null> {
 
 export async function fetchAccountStatus(id: number, Status: number) {
   try {
-    return await api<any>(`${API_URL}/Account/${id}/status`, {
+    return await api<unknown>(`${API_URL}/Account/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify(Status),
     });
@@ -193,7 +202,7 @@ export async function fetchAccountMe(): Promise<AccountDetail | null> {
 
 export async function logout() {
   try {
-    await api<any>(`${API_URL}/Account/logout`, { method: "POST" });
+    await api<unknown>(`${API_URL}/Account/logout`, { method: "POST" });
   } catch (error) {
     console.error("Logout API error:", error);
   } finally {
@@ -234,7 +243,7 @@ export async function fetchRoleById(id: number) {
 
 export async function fetchRoleCreate(newRole: any) {
   try {
-    return await api<any>(`${API_URL}/Role`, {
+    return await api<unknown>(`${API_URL}/Role`, {
       method: "POST",
       body: JSON.stringify(newRole),
     });
@@ -246,7 +255,7 @@ export async function fetchRoleCreate(newRole: any) {
 
 export async function fetchRoleEdit(id: number, updateRole: any) {
   try {
-    return await api<any>(`${API_URL}/Role/${id}`, {
+    return await api<unknown>(`${API_URL}/Role/${id}`, {
       method: "PATCH",
       body: JSON.stringify(updateRole),
     });
@@ -258,7 +267,7 @@ export async function fetchRoleEdit(id: number, updateRole: any) {
 
 export async function fetchRoleDeleted(id: number): Promise<boolean | null> {
   try {
-    await api<any>(`${API_URL}/Role/${id}`, {
+    await api<unknown>(`${API_URL}/Role/${id}`, {
       method: "DELETE",
     });
     return true;
@@ -274,7 +283,7 @@ export async function assignPermissionsToRole(
 ): Promise<any> {
   try {
     const body = { permissionIds };
-    return await api<any>(`${API_URL}/Role/${roleId}/permissions`, {
+    return await api<unknown>(`${API_URL}/Role/${roleId}/permissions`, {
       method: "POST",
       body: JSON.stringify(body),
     });
@@ -286,7 +295,7 @@ export async function assignPermissionsToRole(
 
 export async function fetchDetailRole(roleId: number) {
   try {
-    return await api<any>(`${API_URL}/Role/${roleId}`, {
+    return await api<RoleDto>(`${API_URL}/Role/${roleId}`, {
       method: "GET",
     });
   } catch (error) {
@@ -295,10 +304,10 @@ export async function fetchDetailRole(roleId: number) {
   }
 }
 
-export async function fetchPermissions(roleId: number): Promise<any[] | null> {
+export async function fetchPermissions(roleId: number): Promise<PermissionDto[] | null> {
   try {
     const url = `${API_URL}/Role/${roleId}/permissions`;
-    return await api<any[]>(url, { method: "GET" });
+    return await api<PermissionDto[]>(url, { method: "GET" });
   } catch (error) {
     console.error(`Fetch permissions for role ${roleId} API error:`, error);
     return null;
@@ -323,7 +332,7 @@ export async function fetchAllPermissions(
 
 export async function deletePermission(permissionId: number): Promise<boolean> {
   try {
-    await api<any>(`${API_URL}/permissions/${permissionId}`, {
+    await api<unknown>(`${API_URL}/permissions/${permissionId}`, {
       method: "DELETE",
     });
     return true;
@@ -335,12 +344,65 @@ export async function deletePermission(permissionId: number): Promise<boolean> {
 
 export async function fetchPermissionCreate(newPermission: any) {
   try {
-    return await api<any>(`${API_URL}/permissions`, {
+    return await api<unknown>(`${API_URL}/permissions`, {
       method: "POST",
       body: JSON.stringify(newPermission),
     });
   } catch (error) {
     console.error("Fetch permission create API error:", error);
+    return null;
+  }
+}
+
+export async function fetchAllStudent(
+  Page: number = 1,
+  pageSize: number = 5,
+  Keyword: string = ""
+) {
+  const params = new URLSearchParams({
+    page: Page.toString(),
+    pageSize: pageSize.toString(),
+  });
+
+  if (Keyword) {
+    params.append("Keyword", Keyword);
+  }
+
+  const url = `${API_URL}/Student/paginated?${params.toString()}`;
+
+  try {
+    const data = await api<{
+      Student: Student[];
+      TotalPages: number;
+      Page: number;
+      TotalCount: number;
+      PageSize: number;
+      HasPrevious: boolean;
+      HasNext: boolean;
+    }>(url, { method: "GET" });
+    return {
+      items: data.Student,
+      totalPages: data.TotalPages,
+      currentPage: data.Page,
+      totalCount: data.TotalCount,
+      pageSize: data.PageSize,
+      hasPrevious: data.HasPrevious,
+      hasNext: data.HasNext,
+    };
+  } catch (error) {
+    console.error("Fetch all student API error:", error);
+    throw error;
+  }
+}
+
+export async function fetchStudentStatus(id: number, Status: number) {
+  try {
+    return await api<unknown>(`${API_URL}/Student/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(Status),
+    });
+  } catch (error) {
+    console.error("Fetch student status API error:", error);
     return null;
   }
 }

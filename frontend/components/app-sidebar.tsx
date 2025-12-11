@@ -11,7 +11,8 @@ import {
   Send,
   Settings2,
   LayoutDashboard,
-  CircleUserRound 
+  CircleUserRound,
+  SquareUser 
 } from "lucide-react"
 
 import { NavMain } from "../components/nav-main"
@@ -73,6 +74,17 @@ const navMain = [
         title: "Thêm phân quyền",
         url: "/admin/permission/created",
       },
+    ],
+  },
+  {
+    title:"Sinh viên",
+    url: "#",
+    icon: SquareUser,
+    items: [
+      {
+        title: "Danh sách sinh viên",
+        url: "/admin/student",
+      }
     ],
   },
   {
