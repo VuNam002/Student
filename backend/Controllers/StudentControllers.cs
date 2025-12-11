@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Student;
+using Student_management.Enum;
 using Student_management.Services.Interfaces;
 
 namespace Student_management.Controllers
@@ -68,6 +69,36 @@ namespace Student_management.Controllers
             {
                 _logger.LogError(ex, "Error updating student {id}", id);
                 return StatusCode(500, "Inter server error");
+            }
+        }
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateStudentStatus(int id, [FromBody] byte status)
+        {
+            try
+            {
+                var updateStatusStudent = await _studentService.UpdateStudentStatus(id, (StudentStatus)status);
+                return Ok(updateStatusStudent);
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating student status");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<StudentDto>> Detail(int id)
+        {
+            try
+            {
+                var student = await _studentService.Detail(id);
+                if (student == null)
+                {
+                    return NotFound("Student not found");
+                }
+                return Ok(student);
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting student by ID.");
+                return StatusCode(500, "Internal server error");
             }
         }
     }

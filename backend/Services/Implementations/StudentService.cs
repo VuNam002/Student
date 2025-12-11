@@ -229,5 +229,65 @@ namespace Student_management.Services.Implementations
                 throw;
             }
         }
+        public async Task<bool> UpdateStudentStatus(int id, StudentStatus Status)
+        {
+            try
+            {
+                var student = await _context.Students.FindAsync(id);
+                if(student == null)
+                {
+                    return false;
+                }
+                student.Status = (StudentStatus)(byte)Status;
+                await _context.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "Loi khi cap nhat trang thai");
+                throw;
+            }
+        }
+        public async Task<StudentDto?> Detail(int id)
+        {
+            try
+            {
+                var student = await _context.Students
+                    .AsNoTracking()
+                    .Include(s => s.Person)
+                    .Include(s => s.Class)
+                    .Include(s => s.Account)
+                    .Where(s => s.StudentID == id && !s.IsDeleted)
+                    .Select(s => new StudentDto
+                    {
+                        StudentID = s.StudentID,
+                        PersonID = s.PersonID,
+                        StudentCode = s.StudentCode,
+                        ClassID = s.ClassID,
+                        ClassName = s.Class != null ? s.Class.ClassName : null,
+                        EnrollmentDate = s.EnrollmentDate,
+                        GraduationDate = s.GraduationDate,
+                        Status = s.Status,
+                        AccountID = s.AccountID,
+                        Person = s.Person == null ? null : new PersonDto
+                        {
+                            PersonID = s.Person.PersonID,
+                            FullName = s.Person.FullName,
+                            DateOfBirth = s.Person.DateOfBirth,
+                            Gender = s.Person.Gender,
+                            Email = s.Person.Email,
+                            PhoneNumber = s.Person.PhoneNumber,
+                            Address = s.Person.Address
+                        }
+                    })
+                    .FirstOrDefaultAsync();
+
+                return student;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Loi khi lay chi tiet sinh vien");
+                throw;
+            }
+        }
     }
 }
