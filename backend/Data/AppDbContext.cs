@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Student_management.Models;
+using Student_management.Models.Entities;
 using System.Security;
 
 namespace Student_management.Data
@@ -31,12 +31,18 @@ namespace Student_management.Data
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
+            modelBuilder.Entity<Student>()
+                .ToTable(tb => tb.HasTrigger("Student_Trigger"));
+
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Account)
                 .WithOne(a => a.Teacher)
                 .HasForeignKey<Teacher>(t => t.AccountID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Teacher>()
+                .ToTable(tb => tb.HasTrigger("Teacher_Trigger"));
 
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Account)
@@ -54,6 +60,23 @@ namespace Student_management.Data
 
             modelBuilder.Entity<Account>()
                 .ToTable(tb => tb.HasTrigger("Account_Trigger"));
+
+            modelBuilder.Entity<Person>()
+                .ToTable(tb => tb.HasTrigger("Person_Trigger"));
+
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.Person)
+                .WithOne(p => p.Student)
+                .HasForeignKey<Student>(s => s.PersonID)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Teacher>()
+                .HasOne(t => t.Person)
+                .WithOne(p => p.Teacher)
+                .HasForeignKey<Teacher>(t => t.PersonID)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<RolePermission>(entity =>
             {
@@ -74,28 +97,32 @@ namespace Student_management.Data
 
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.Department)
-                .WithMany()
+                .WithMany(d => d.Teachers)
                 .HasForeignKey(t => t.DepartmentID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Class)
-                .WithMany(c => c.Students) 
+                .WithMany(c => c.Students)
                 .HasForeignKey(s => s.ClassID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Department)
-                .WithMany() 
+                .WithMany(d => d.Classes)
                 .HasForeignKey(c => c.DepartmentID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Teacher)
-                .WithMany() 
+                .WithMany(t => t.Classes)
                 .HasForeignKey(c => c.TeacherID)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Class>().ToTable("Class");
 
             base.OnModelCreating(modelBuilder);

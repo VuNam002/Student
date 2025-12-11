@@ -1,9 +1,10 @@
-﻿using Student_management.Models;
+﻿using Student_management.Models.Base;
+using Student_management.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("Department")]
-public class Department
+public class Department : BaseEntity
 {
     [Key]
     public int DepartmentID { get; set; }
@@ -18,11 +19,6 @@ public class Department
 
     [StringLength(255)]
     public string? Description { get; set; }
-
-    public bool IsDeleted { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
 
     public ICollection<Teacher>? Teachers { get; set; }
     public ICollection<Class>? Classes { get; set; }

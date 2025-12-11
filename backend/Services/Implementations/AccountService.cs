@@ -8,6 +8,7 @@ using Student_management.DTOs.Permission;
 using Student_management.Enum;
 using Student_management.Helpers;
 using Student_management.Models;
+using Student_management.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,7 +17,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Student_management.Services
+namespace Student_management.Services.Implementations
 {
     public class AccountService : IAccountService
     {

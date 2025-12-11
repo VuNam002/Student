@@ -1,11 +1,11 @@
-﻿using Student_management.Models;
+﻿using Student_management.Models.Base;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_management.Models 
+namespace Student_management.Models.Entities 
 {
     [Table("Class")]
-    public class Class
+    public class Class : BaseEntity
     {
         [Key]
         public int ClassID { get; set; }
@@ -25,10 +25,6 @@ namespace Student_management.Models
         public string? AcademicYear { get; set; }
 
         public int? Semester { get; set; }
-
-        public bool IsDeleted { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey(nameof(DepartmentID))]
         public Department? Department { get; set; }

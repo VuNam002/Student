@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Account;
 using Student_management.Enum;
-using Student_management.Services;
+using Student_management.Services.Interfaces;
 using System.Security.Claims;
 
 namespace Student_management.Controllers

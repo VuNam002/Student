@@ -1,9 +1,10 @@
-﻿using Student_management.Models;
+﻿using Student_management.Models.Base;
+using Student_management.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("Teacher")]
-public class Teacher
+public class Teacher : BaseEntity
 {
     [Key]
     public int TeacherID { get; set; }
@@ -27,10 +28,6 @@ public class Teacher
     public string? Specialization { get; set; }
 
     public int? AccountID { get; set; }
-
-    public bool IsDeleted { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public Person? Person { get; set; } 
     public Department? Department { get; set; }

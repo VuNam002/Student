@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Student;
-using Student_management.Services;
+using Student_management.Services.Interfaces;
 
 namespace Student_management.Controllers
 {
@@ -53,7 +53,22 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-        //[HttpPatch("{id}")]
-        //public async Task<ActionResult> EditStudent(int id, [])
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<StudentDto>> EditStudent(int id, [FromBody] CreateStudent dto)
+        {
+            try
+            {
+                var student = await _studentService.EditStudent(id, dto);
+                if(student == null)
+                {
+                    return NotFound("Student not found");
+                }
+                return Ok(student);
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating student {id}", id);
+                return StatusCode(500, "Inter server error");
+            }
+        }
     }
 }

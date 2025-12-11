@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Student_management.Data;
 using Student_management.DTOs.Role;
+using Student_management.Services.Interfaces;
 
-namespace Student_management.Services
+namespace Student_management.Services.Implementations
 {
     public class RoleService : IRoleService
     {

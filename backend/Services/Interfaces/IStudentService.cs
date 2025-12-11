@@ -1,7 +1,7 @@
-﻿﻿using Student_management.DTOs.Account;
+﻿using Student_management.DTOs.Account;
 using Student_management.DTOs.Student;
 
-namespace Student_management.Services
+namespace Student_management.Services.Interfaces
 {
     public interface IStudentService
     {

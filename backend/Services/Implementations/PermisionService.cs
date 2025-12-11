@@ -2,8 +2,9 @@
 using Student_management.Data;
 using Student_management.DTOs.Permission;
 using Student_management.Models;
+using Student_management.Services.Interfaces;
 
-namespace Student_management.Services
+namespace Student_management.Services.Implementations
 {
     public class PermissionService : IPermissionService
     {

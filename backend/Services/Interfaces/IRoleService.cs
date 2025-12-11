@@ -1,6 +1,6 @@
 ﻿using Student_management.DTOs.Role;
 
-namespace Student_management.Services
+namespace Student_management.Services.Interfaces
 {
     public interface IRoleService
     {

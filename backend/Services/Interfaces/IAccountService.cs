@@ -4,7 +4,7 @@ using Student_management.Enum;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Student_management.Services
+namespace Student_management.Services.Interfaces
 {
     public interface IAccountService
     {

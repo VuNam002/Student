@@ -1,11 +1,12 @@
-﻿
+﻿using Student_management.Models.Base;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Student_management.Models.Entities;
 
-namespace Student_management.Models
+namespace Student_management.Models.Entities
 {
     [Table("Person")]
-    public class Person
+    public class Person : BaseEntity
     {
         [Key]
         public int PersonID { get; set; }
@@ -36,11 +37,6 @@ namespace Student_management.Models
         [StringLength(20)]
         public string? IdentityCard { get; set; }
 
-        public bool IsDeleted { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
-        // Navigation Properties (1-1 relationships)
         public Teacher? Teacher { get; set; }
         public Student? Student { get; set; }
     }

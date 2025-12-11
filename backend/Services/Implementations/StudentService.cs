@@ -5,8 +5,10 @@ using Student_management.DTOs.Person;
 using Student_management.DTOs.Student;
 using Student_management.Enum;
 using Student_management.Models;
+using Student_management.Models.Entities;
+using Student_management.Services.Interfaces;
 
-namespace Student_management.Services
+namespace Student_management.Services.Implementations
 {
     public class StudentService : IStudentService
     {

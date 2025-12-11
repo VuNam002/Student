@@ -3,8 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Student_management.Data;
-using Student_management.Services;
 using Microsoft.OpenApi.Models;
+using Student_management.Services.Implementations;
+using Student_management.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

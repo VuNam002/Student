@@ -1,14 +1,14 @@
-﻿using Student_management.Models;
-using Student_management.Enum;
+﻿using Student_management.Enum;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Student_management.Models.Base;
 
-namespace Student_management.Models
+namespace Student_management.Models.Entities
 {
     [Table("Student")]
     [Index(nameof(StudentCode), IsUnique = true)]
-    public class Student
+    public class Student : BaseEntity
     {
         [Key]
         public int StudentID { get; set; }
@@ -32,11 +32,6 @@ namespace Student_management.Models
 
         public int? AccountID { get; set; }
 
-        public bool IsDeleted { get; set; } = false;
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         [ForeignKey(nameof(PersonID))]

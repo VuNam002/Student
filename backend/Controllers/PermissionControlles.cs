@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Permission;
 using Student_management.Models;
-using Student_management.Services;
+using Student_management.Services.Implementations;
 
 namespace Student_management.Controllers
 {

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Student_management.Models.Base;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("RolePermission")]
-public class RolePermission
+public class RolePermission : BaseEntity
 {
     [Key]
     public int RolePermissionID { get; set; }
@@ -12,10 +13,6 @@ public class RolePermission
 
     [Required]
     public int PermissionID { get; set; }
-
-    public bool IsDeleted { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public Role? Role { get; set; }
     public Permission? Permission { get; set; }

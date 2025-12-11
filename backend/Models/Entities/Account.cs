@@ -1,9 +1,11 @@
-﻿using Student_management.Models;
+﻿using System;
+using Student_management.Models.Base;
+using Student_management.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("Account")]
-public class Account
+public class Account : BaseEntity
 {
     [Key]
     public int AccountID { get; set; }
@@ -29,11 +31,6 @@ public class Account
 
     [StringLength(15)]
     public string? PhoneNumber { get; set; }
-
-    public bool IsDeleted { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
     public Role? Role { get; set; }
     public Teacher? Teacher { get; set; }
     public Student? Student { get; set; }
