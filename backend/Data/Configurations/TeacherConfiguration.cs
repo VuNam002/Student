@@ -18,7 +18,6 @@ namespace Student_management.Data.Configurations
 
             builder.HasIndex(t => t.TeacherCode).IsUnique();
 
-            // Relationships
             builder.HasOne(t => t.Person)
                 .WithOne(p => p.Teacher)
                 .HasForeignKey<Teacher>(t => t.PersonID)

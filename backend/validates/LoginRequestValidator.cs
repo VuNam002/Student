@@ -9,12 +9,12 @@ namespace Student_management.validates
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email la bat buoc")
-                .EmailAddress().WithMessage("Email không hợp lệ")
-                .MaximumLength(100).WithMessage("Email không được vượt quá 100 ký tự");
+                .EmailAddress().WithMessage("Email khong hop le")
+                .MaximumLength(100).WithMessage("Email khong ton tai");
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Mật khẩu là bắt buộc")
-                .MinimumLength(6).WithMessage("Mật khẩu phải có ít nhất 6 ký tự")
-                .MaximumLength(50).WithMessage("Mật khẩu không được vượt quá 50 ký tự");
+                .NotEmpty().WithMessage("Mat khau la bat buoc")
+                .MinimumLength(6).WithMessage("Mat khau phai it nhat 6 ky tu")
+                .MaximumLength(50).WithMessage("Mat khau khong vuot qua 50 ky tu");
         }
     }
 }

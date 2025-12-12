@@ -261,7 +261,7 @@ namespace Student_management.Services.Implementations
                 if (!string.IsNullOrWhiteSpace(dto.Password))
                 {
                     if (dto.Password.Length < 6)
-                        throw new InvalidOperationException("MatKhau phai co it nhat 6 ky tu.");
+                        throw new InvalidOperationException("Mat khau phai co it nhat 6 ky tu.");
                     account.Password = HashHelper.ComputeMd5Hash(dto.Password);
                 }
 
@@ -373,7 +373,7 @@ namespace Student_management.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi tìm kiếm tài khoản");
+                _logger.LogError(ex, "Loi khi tim kiem tai khoan");
                 throw;
             }
         }
