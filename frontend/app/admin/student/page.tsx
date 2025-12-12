@@ -51,11 +51,12 @@ export default function StudentPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [keyword, setKeyword] = useState("");
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<number | null>(null);
 
-  const loadStudents = async (currentPage: number, search: string) => {
+  const loadStudents = async (currentPage: number, search: string, status: number | null) => {
     setLoading(true);
     try {
-      const data = await fetchAllStudent(currentPage, 10, search);
+      const data = await fetchAllStudent(currentPage, 10, search, status);
       setStudents(data.items || []);
       setTotalPages(data.totalPages || 1);
       setTotalCount(data.totalCount || 0);
@@ -68,13 +69,13 @@ export default function StudentPage() {
   };
 
   useEffect(() => {
-    loadStudents(page, keyword);
+    loadStudents(page, keyword, statusFilter);
   }, [page]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    loadStudents(1, keyword);
+    loadStudents(1, keyword, statusFilter);
   };
 
   const formatDate = (dateString: string) => {
@@ -231,6 +232,23 @@ export default function StudentPage() {
       <Card>
         <CardContent className="pt-2">
           <form onSubmit={handleSearch} className="flex gap-2">
+            <select
+              className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              value={statusFilter ?? ""}
+              onChange={(e) => {
+                const value = e.target.value ? Number(e.target.value) : null;
+                setStatusFilter(value);
+                setPage(1);
+                loadStudents(1, keyword, value);
+              }}
+            >
+              <option value="">Tất cả trạng thái</option>
+              {Object.entries(studentStatusConfig).map(([key, config]) => (
+                <option key={key} value={key}>
+                  {config.label}
+                </option>
+              ))}
+            </select>
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -273,7 +291,7 @@ export default function StudentPage() {
                       <TableHead>Email</TableHead>
                       <TableHead>Số điện thoại</TableHead>
                       <TableHead>Trạng thái</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                      <TableHead className="text-center">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -305,7 +323,7 @@ export default function StudentPage() {
                         <TableCell>
                           <StatusDisplay Status={student.Status} id={student.StudentID} />
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           <Button variant="ghost" size="sm" asChild>
                             <Link href={`student/detail/${student.StudentID}`}>
                               <Eye className="mr-2 h-4 w-4" />

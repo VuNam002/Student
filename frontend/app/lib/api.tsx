@@ -362,7 +362,8 @@ export async function fetchPermissionCreate(newPermission: any) {
 export async function fetchAllStudent(
   Page: number = 1,
   pageSize: number = 5,
-  Keyword: string = ""
+  Keyword: string = "",
+  Status?: number | null
 ) {
   const params = new URLSearchParams({
     page: Page.toString(),
@@ -371,6 +372,10 @@ export async function fetchAllStudent(
 
   if (Keyword) {
     params.append("Keyword", Keyword);
+  }
+
+  if (Status !== undefined && Status !== null) {
+    params.append("Status", Status.toString());
   }
 
   const url = `${API_URL}/Student/paginated?${params.toString()}`;
