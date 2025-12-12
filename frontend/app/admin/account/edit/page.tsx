@@ -181,6 +181,14 @@ function EditAccountForm() {
 
     try {
       const result = await fetchAccountEdit(Number(accountId), payload);
+
+      // Kiểm tra nếu backend trả về lỗi validation (success: false)
+      if (result && result.success === false) {
+        const errorMessages = result.errors?.map((err: any) => err.message).join('\n') || "Cập nhật thất bại.";
+        alert("Lỗi: \n" + errorMessages);
+        return;
+      }
+
       if (result) {
         alert("Cập nhật tài khoản thành công!");
         router.push('/admin/account');
@@ -317,7 +325,7 @@ function EditAccountForm() {
               <div className="space-y-2">
                 <label className="font-medium">Avatar</label>
                 <div className="flex items-center gap-4">
-                  {formData.Avatar && (
+                  {formData.Avatar && formData.Avatar !== "string" && (
                     <img 
                       src={formData.Avatar} 
                       alt="Avatar" 

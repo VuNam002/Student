@@ -37,7 +37,7 @@ export function LoginForm({
           if (user) {
             auth.login(user, token);
           } else {
-            router.push("/dashboard");
+            router.push("admin/dashboard");
           }
         } catch (e) {
           console.warn('Failed to fetch user from token', e);

@@ -221,12 +221,12 @@ export default function StudentPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="w-full p-6 space-y-2">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Danh sách sinh viên</h1>
         </div>
-      </div>
+      </div>  
 
       <Card>
         <CardContent className="pt-2">
