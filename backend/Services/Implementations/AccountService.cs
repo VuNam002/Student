@@ -66,18 +66,32 @@ namespace Student_management.Services.Implementations
         public async Task<string?> LoginAsync(LoginRequestDto loginRequest)
         {
             if (loginRequest is null) return null;
-
-            if (string.IsNullOrEmpty(loginRequest.Password) || loginRequest.Password.Length < 6)
+ 
+            if (string.IsNullOrEmpty(loginRequest.Email))
             {
-                _logger.LogWarning("Login attempt for {User} with too short password.", loginRequest.Email);
+                _logger.LogWarning("Login attempt with empty email.");
                 return null;
             }
 
-            var account = await _context.Accounts
-                .FirstOrDefaultAsync(a => a.Email == loginRequest.Email);
-
-            if (account is null || account.Status != 1)
+            if (string.IsNullOrEmpty(loginRequest.Password))
             {
+                _logger.LogWarning("Login attempt for {User} with empty password.", loginRequest.Email);
+                return null;
+            }
+
+            var email = loginRequest.Email.Trim();
+            var account = await _context.Accounts
+                .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
+
+            if (account is null)
+            {
+                _logger.LogWarning("Login failed: Account not found for email {Email}", email);
+                return null;
+            }
+
+            if (account.Status != 1)
+            {
+                _logger.LogWarning("Login failed: Account {Email} is inactive. Status: {Status}", email, account.Status);
                 return null;
             }
 
@@ -109,7 +123,7 @@ namespace Student_management.Services.Implementations
             if (string.IsNullOrWhiteSpace(keyString))
                 throw new InvalidOperationException("JWT Key is not configured.");
 
-            var key = Encoding.ASCII.GetBytes(keyString);
+            var key = Encoding.UTF8.GetBytes(keyString);
 
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
@@ -181,6 +195,7 @@ namespace Student_management.Services.Implementations
                 if (!roleExists)
                     throw new InvalidOperationException($"Role with ID {dto.RoleID} does not exist.");
 
+
                 var newAccount = new Account
                 {
                     Email = username,
@@ -188,7 +203,7 @@ namespace Student_management.Services.Implementations
                     Avatar = dto.Avatar,
                     FullName = dto.FullName,
                     PhoneNumber = dto.PhoneNumber,
-                    Status = dto.Status,
+                    Status = (byte)AccountStatus.Active,
                     CreatedAt = dto.CreatedAt
                 };
 
@@ -231,6 +246,15 @@ namespace Student_management.Services.Implementations
                 var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == dto.RoleID);
                 if (!roleExists)
                     throw new InvalidOperationException($"Role voi ID {dto.RoleID} khong ton tai.");
+                if(!string.IsNullOrEmpty(dto.Email))
+                {
+                    var emailCheck = dto.Email.Trim().ToLower();
+                    var isDuplicate = await _context.Accounts.AnyAsync(a => a.Email.ToLower() == emailCheck && a.AccountID != id && !a.IsDeleted);
+                    if(isDuplicate)
+                    {
+                        throw new ArgumentException("{\"success\":false,\"errors\":[{\"field\":\"Email\",\"message\":\"Email da ton tai\"}]}");
+                    }
+                }
 
                 account.Email = dto.Email ?? account.Email;
 

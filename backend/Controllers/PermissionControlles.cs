@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Permission;
 using Student_management.Models;
-using Student_management.Services.Implementations;
+using Student_management.Services.Interfaces; // ✅ Dùng namespace Interfaces
 
 namespace Student_management.Controllers
 {
@@ -11,17 +11,19 @@ namespace Student_management.Controllers
     //[Authorize]
     public class PermissionController : ControllerBase
     {
-        private readonly PermissionService _permissionService;
+        private readonly IPermissionService _permissionService; // ✅ Dùng interface
         private readonly ILogger<PermissionController> _logger;
 
-        public PermissionController(PermissionService permissionService, ILogger<PermissionController> logger)
+        public PermissionController(
+            IPermissionService permissionService,  // ✅ Dùng interface
+            ILogger<PermissionController> logger)
         {
             _permissionService = permissionService;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PermissionDto>>> GetAllPermissionsGrouped([FromQuery] string? module = null)
+        public async Task<ActionResult<IEnumerable<object>>> GetAllPermissionsGrouped([FromQuery] string? module = null)
         {
             try
             {
@@ -44,6 +46,7 @@ namespace Student_management.Controllers
                 {
                     return BadRequest("Permission data is invalid.");
                 }
+
                 var result = await _permissionService.CreatePermissions(request);
                 return Ok(result);
             }
@@ -64,7 +67,7 @@ namespace Student_management.Controllers
                 {
                     return NotFound("Permission not found.");
                 }
-                // Trả về JSON object thay vì string thô để Frontend dễ xử lý
+
                 return Ok(new { message = "Permission deleted successfully." });
             }
             catch (Exception ex)

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Account;
 using Student_management.Enum;
 using Student_management.Services.Interfaces;
 using System.Security.Claims;
+using System;
 
 namespace Student_management.Controllers
 {
@@ -13,10 +15,19 @@ namespace Student_management.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly ILogger<AccountController> _logger;
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
+        private readonly IValidator<LoginRequestDto> _loginValidator;
+        private readonly IValidator<CreateAccount> _createAccountValidator;
+
+        public AccountController(
+            IAccountService accountService,
+            ILogger<AccountController> logger,
+            IValidator<LoginRequestDto> loginValidator,
+            IValidator<CreateAccount> createAccountValidator)
         {
             _accountService = accountService;
             _logger = logger;
+            _loginValidator = loginValidator;
+            _createAccountValidator = createAccountValidator;
         }
 
         [HttpGet]
@@ -25,12 +36,12 @@ namespace Student_management.Controllers
             try
             {
                 var accounts = await _accountService.GetAll();
-                return Ok(accounts);
+                return Ok(new { success = true, data = accounts });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all accounts.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -39,19 +50,34 @@ namespace Student_management.Controllers
         {
             try
             {
+                var validationResult = await _loginValidator.ValidateAsync(loginRequest);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = validationResult.Errors.Select(e => new
+                        {
+                            field = e.PropertyName,
+                            message = e.ErrorMessage
+                        })
+                    });
+                }
+
                 var token = await _accountService.LoginAsync(loginRequest);
 
                 if (token == null)
                 {
                     _logger.LogWarning("Login failed for user {Email}. Invalid credentials or inactive account.", loginRequest.Email);
-                    return Unauthorized("Invalid username or password.");
+                    return Unauthorized(new { success = false, message = "Email hoac mat khau khong dung" });
                 }
-                return Ok(token);
+
+                return Ok(new { success = true, token });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during login.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -60,17 +86,23 @@ namespace Student_management.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest(new { success = false, message = "ID phai lon hon 0" });
+                }
+
                 var account = await _accountService.Detail(id);
                 if (account == null)
                 {
-                    return NotFound("Account not found.");
+                    return NotFound(new { success = false, message = "Khong tim thay tai khoan" });
                 }
-                return Ok(account);
+
+                return Ok(new { success = true, data = account });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while getting account by ID.");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "An error occurred while getting account by ID: {AccountId}", id);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -81,33 +113,39 @@ namespace Student_management.Controllers
             {
                 if (dto == null)
                 {
-                    return BadRequest("Invalid user data.");
+                    return BadRequest(new { success = false, message = "Du lieu khong hop le" });
                 }
 
-                var account = new CreateAccount
+                var validationResult = await _createAccountValidator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
                 {
-                    Email = dto.Email,
-                    Password = dto.Password,
-                    RoleID = dto.RoleID,
-                    Avatar = dto.Avatar,
-                    Status = dto.Status,
-                    CreatedAt = dto.CreatedAt,
-                    FullName = dto.FullName,
-                    PhoneNumber = dto.PhoneNumber
-                };
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = validationResult.Errors.Select(e => new
+                        {
+                            field = e.PropertyName,
+                            message = e.ErrorMessage
+                        })
+                    });
+                }
 
-                var createdAccount = await _accountService.CreateAccount(account);
-                return Ok(createdAccount);
+                var createdAccount = await _accountService.CreateAccount(dto);
+                return CreatedAtAction(
+                    nameof(Detail),
+                    new { id = createdAccount.ID },
+                    new { success = true, data = createdAccount }
+                );
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Invalid operation while creating account.");
-                return Conflict(ex.Message);
+                return Conflict(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating an account.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -116,40 +154,54 @@ namespace Student_management.Controllers
         {
             try
             {
-                if (dto == null)
+                if (id <= 0)
                 {
-                    return BadRequest("Invalid user data.");
+                    return BadRequest(new { success = false, message = "ID phải lớn hơn 0" });
                 }
 
-                var account = new CreateAccount
+                if (dto == null)
                 {
-                    Email = dto.Email,
-                    Password = dto.Password,
-                    RoleID = dto.RoleID,
-                    Avatar = dto.Avatar,
-                    Status = dto.Status,
-                    CreatedAt = dto.CreatedAt,
-                    FullName = dto.FullName,
-                    PhoneNumber = dto.PhoneNumber
-                };
+                    return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
 
-                var updatedAccount = await _accountService.EditAccount(id, account);
-                return Ok(updatedAccount);
+                var validationResult = await _createAccountValidator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors
+                        .Where(e => !(e.PropertyName == "Password" && string.IsNullOrWhiteSpace(dto.Password)))
+                        .ToList();
+
+                    if (errors.Any())
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = errors.Select(e => new
+                            {
+                                field = e.PropertyName,
+                                message = e.ErrorMessage
+                            })
+                        });
+                    }
+                }
+
+                var updatedAccount = await _accountService.EditAccount(id, dto);
+                return Ok(new { success = true, data = updatedAccount });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation while editing account.");
-                return BadRequest(ex.Message);
+                _logger.LogWarning(ex, "Invalid operation while editing account ID: {AccountId}", id);
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Account not found while editing.");
-                return NotFound(ex.Message);
+                _logger.LogWarning(ex, "Account not found while editing ID: {AccountId}", id);
+                return NotFound(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while editing an account.");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "An error occurred while editing account ID: {AccountId}", id);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -158,17 +210,23 @@ namespace Student_management.Controllers
         {
             try
             {
+                if (id <= 0)
+                {
+                    return BadRequest(new { success = false, message = "ID phai lon hon 0" });
+                }
+
                 var result = await _accountService.DeleteAccount(id);
                 if (!result)
                 {
-                    return NotFound("Account not found to delete.");
+                    return NotFound(new { success = false, message = "khong tim thay tai khoan de xoa" });
                 }
-                return Ok(new { message = "Account deleted successfully." });
+
+                return Ok(new { success = true, message = "Xoa tai khoan thanh cong" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting an account.");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "An error occurred while deleting account ID: {AccountId}", id);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -177,40 +235,53 @@ namespace Student_management.Controllers
         {
             try
             {
-                // Validate Page and PageSize
                 if (accountSearch.Page <= 0 || accountSearch.PageSize <= 0)
                 {
-                    return BadRequest("Page and PageSize must be greater than 0.");
+                    return BadRequest(new { success = false, message = "Page va PageSize phai lon hon 0" });
                 }
 
-                Pagination paginatedAccounts = await _accountService.GetAccountPagination(accountSearch);
-                return Ok(paginatedAccounts);
+                if (accountSearch.PageSize > 100)
+                {
+                    return BadRequest(new { success = false, message = "PageSize khong vuot qua 100" });
+                }
+
+                var paginatedAccounts = await _accountService.GetAccountPagination(accountSearch);
+                return Ok(new { success = true, data = paginatedAccounts });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting paginated account list.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
-        // Update product status (This comment seems to be a typo in your original code, should likely be "Update account status")
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateAccountStatus(int id, [FromBody] byte trangThai)
+        public async Task<IActionResult> UpdateAccountStatus(int id, [FromBody] AccountStatusRequest request)
         {
             try
             {
-                var updatedAccount = await _accountService.UpdateAccountStatus(id, (AccountStatus)trangThai);
-                return Ok(updatedAccount);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Account not found while updating status.");
-                return NotFound(ex.Message);
+                if (id <= 0)
+                {
+                    return BadRequest(new { success = false, message = "ID phai lon hon 0" });
+                }
+
+                if (!System.Enum.IsDefined(typeof(AccountStatus), request.Status))
+                {
+                    return BadRequest(new { success = false, message = "Trang thai khong hop le" });
+                }
+
+                var result = await _accountService.UpdateAccountStatus(id, (AccountStatus)request.Status);
+                if (!result)
+                {
+                    return NotFound(new { success = false, message = "Khong tim thay tai khoan" });
+                }
+
+                return Ok(new { success = true, message = "Cap nhat trang thai thanh cong" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while updating account status.");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "An error occurred while updating account status for ID: {AccountId}", id);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -223,21 +294,21 @@ namespace Student_management.Controllers
                 var accountIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(accountIdClaim) || !int.TryParse(accountIdClaim, out var accountId))
                 {
-                    return Unauthorized("Unable to authenticate account.");
+                    return Unauthorized(new { success = false, message = "Khong the xac thuc tai khoan" });
                 }
 
                 var account = await _accountService.Detail(accountId);
                 if (account == null)
                 {
-                    return NotFound("Account not found.");
+                    return NotFound(new { success = false, message = "Khong tim thay tai khoan" });
                 }
 
-                return Ok(account);
+                return Ok(new { success = true, data = account });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting my account information.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -247,23 +318,28 @@ namespace Student_management.Controllers
         {
             try
             {
-                // Extract the token from the Authorization header
                 var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    return Unauthorized("Token not found.");
+                    return Unauthorized(new { success = false, message = "Token khong ton tai" });
                 }
 
                 await _accountService.LogoutAsync(token);
 
-                return NoContent(); // Or Ok(new { message = "Logged out successfully" });
+                return Ok(new { success = true, message = "Dang xuat thanh cong" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during logout.");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
+    }
+
+    // DTO cho UpdateAccountStatus
+    public class AccountStatusRequest
+    {
+        public byte Status { get; set; }
     }
 }
