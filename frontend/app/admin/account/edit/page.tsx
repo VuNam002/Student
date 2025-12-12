@@ -62,13 +62,7 @@ function EditAccountForm() {
           fetchAccountById(Number(accountId)),
           fetchRole()
         ]);
-
-        // ✅ DEBUG - Xem data trả về
-        console.log("Account Data:", accountData);
-        console.log("Roles Data:", rolesData);
-
         if (accountData) {
-          // ✅ Hỗ trợ cả RoleID và roleID
           const roleId = accountData.RoleID || accountData.roleID || 0;
           
           setFormData({

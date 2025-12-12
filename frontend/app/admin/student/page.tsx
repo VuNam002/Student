@@ -311,6 +311,11 @@ export default function StudentPage() {
                               <Eye className="mr-2 h-4 w-4" />
                             </Link>
                           </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`student/edit/?id=${student.StudentID}`}>
+                              <GraduationCap className="mr-2 h-4 w-4" />
+                            </Link>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

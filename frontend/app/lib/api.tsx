@@ -424,3 +424,16 @@ export async function fetchDetailStudent(StudentID:number) {
     return null;
   }
 }
+
+export async function fetchUpdateStudent(id:number, updateStudent: any) {
+  try {
+    const response = await api<any>(`${API_URL}/Student/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(updateStudent),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch update student API error:", error);
+    return null;
+  }
+}
