@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Student_management.DTOs.Permission;
 using Student_management.Models;
-using Student_management.Services.Interfaces; // ✅ Dùng namespace Interfaces
+using Student_management.Services.Interfaces; 
 
 namespace Student_management.Controllers
 {
@@ -11,11 +11,11 @@ namespace Student_management.Controllers
     //[Authorize]
     public class PermissionController : ControllerBase
     {
-        private readonly IPermissionService _permissionService; // ✅ Dùng interface
+        private readonly IPermissionService _permissionService; 
         private readonly ILogger<PermissionController> _logger;
 
         public PermissionController(
-            IPermissionService permissionService,  // ✅ Dùng interface
+            IPermissionService permissionService, 
             ILogger<PermissionController> logger)
         {
             _permissionService = permissionService;
