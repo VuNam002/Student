@@ -46,7 +46,6 @@ namespace Student_management.Validators
             if (string.IsNullOrWhiteSpace(email)) return true;
             return !await _context.Accounts.AnyAsync(a => a.Email == email.Trim(), cancellationToken);
         }
-
         private async Task<bool> RoleExists(int roleId, CancellationToken cancellationToken)
         {
             return await _context.Roles.AnyAsync(r => r.RoleID == roleId, cancellationToken);

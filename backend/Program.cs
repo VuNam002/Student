@@ -6,7 +6,8 @@ using Microsoft.OpenApi.Models;
 using Student_management.Data;
 using Student_management.Services.Implementations;
 using Student_management.Services.Interfaces;
-using Student_management.Validators; 
+using Student_management.Validators;
+using Student_management.Middlewares;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +55,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-builder.Services.AddScoped<EditAccountValidator>(); 
+builder.Services.AddScoped<EditAccountValidator>();
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
@@ -91,14 +92,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseCors(MyAllowSpecificOrigins);
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+app.ConfigureMiddlewarePipeline(MyAllowSpecificOrigins);
 app.Run();
