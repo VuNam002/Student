@@ -88,3 +88,22 @@ export interface Student {
     DateOfBirth: string;
   };
 }
+
+export interface StudentDetail {
+  StudentID: number;
+  StudentCode: string;
+  PersonID: number;
+  ClassName: number;
+  EnrollmentDate: string;
+  Status: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  Person: {
+    FullName: string;
+    DateOfBirth: string;
+    Gender: string;
+    Email: string;
+    PhoneNumber: string;
+    Address: string;
+  };
+}

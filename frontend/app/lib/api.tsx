@@ -412,3 +412,15 @@ export async function fetchStudentStatus(id: number, Status: number) {
     return null;
   }
 }
+
+export async function fetchDetailStudent(StudentID:number) {
+  try {
+    const response = await api<any>(`${API_URL}/Student/${StudentID}`, {
+      method: "GET",
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch detail student API error:", error);
+    return null;
+  }
+}
