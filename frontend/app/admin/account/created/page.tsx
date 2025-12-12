@@ -142,7 +142,6 @@ export default function AdminAccountCreatePage() {
     };
 
     try {
-      // Replace with your actual API call
       const result = await fetchAccountCreat(payload);
       if (result) {
         alert("Tạo tài khoản thành công!");

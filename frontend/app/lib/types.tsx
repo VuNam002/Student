@@ -107,3 +107,18 @@ export interface StudentDetail {
     Address: string;
   };
 }
+
+export interface StudentDto {
+  StudentCode: string;
+  ClassID: number;
+  Status: number;
+  EnrollmentDate: string;
+  PersonID: {
+    FullName: string;
+    DateOfBirth: string;
+    Gender: string;
+    Email: string;
+    PhoneNumber: string;
+    Address: string;
+  };
+}

@@ -31,6 +31,8 @@ import {
 import { fetchAccountMe } from "../app/lib/api"
 import { AccountDetail } from "@/app/lib/types";
 import { useEffect, useState } from "react";
+import { title } from "process"
+import { url } from "inspector"
 
 const navMain = [
   {
@@ -84,7 +86,11 @@ const navMain = [
       {
         title: "Danh sách sinh viên",
         url: "/admin/student",
-      }
+      },
+      {
+        title: "Thêm sinh viên",
+        url: "/admin/student/created",
+      } 
     ],
   },
   {

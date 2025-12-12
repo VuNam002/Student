@@ -442,3 +442,16 @@ export async function fetchUpdateStudent(id:number, updateStudent: any) {
     return null;
   }
 }
+
+export async function fetchCreateStudent(newStudent:any) {
+  try {
+    const response = await api<any>(`${API_URL}/Student`, {
+      method: "POST",
+      body: JSON.stringify(newStudent),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch create student API error:", error);
+    return null;
+  }
+}
