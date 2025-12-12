@@ -175,7 +175,7 @@ export default function CreateStudentPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end gap-2">
+            <CardFooter className="flex justify-end gap-3 mt-4">
               <Button type="button" variant="outline" onClick={() => router.back()}>Hủy</Button>
               <Button type="submit">Thêm mới</Button>
             </CardFooter>

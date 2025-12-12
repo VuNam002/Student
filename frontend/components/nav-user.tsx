@@ -37,6 +37,7 @@ export function NavUser({
   user,
 }: {
   user: {
+    id?: number
     name: string | null
     email: string
     avatar: string | null
@@ -50,6 +51,11 @@ export function NavUser({
   }
 
   const handleSubmit = async () => {
+    if (user.id) {
+      router.push(`/admin/account/detail/${user.id}`)
+      return
+    }
+
     try {
       const accountDetail = await fetchAccountMe()
       if (accountDetail) {

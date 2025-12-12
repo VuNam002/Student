@@ -201,7 +201,8 @@ export async function fetchAccountStatus(id: number, Status: number) {
 
 export async function fetchAccountMe(): Promise<AccountDetail | null> {
   try {
-    return await api<AccountDetail>(`${API_URL}/Account/me`, { method: "GET" });
+    const response = await api<any>(`${API_URL}/Account/me`, { method: "GET" });
+    return response?.data || response;
   } catch (error) {
     console.error("Fetch account me API error:", error);
     return null;
