@@ -3,6 +3,7 @@ using Student_management.Data;
 using Student_management.DTOs.Permission;
 using Student_management.Models;
 using Student_management.Services.Interfaces;
+using AutoMapper;
 
 namespace Student_management.Services.Implementations
 {
@@ -10,11 +11,13 @@ namespace Student_management.Services.Implementations
     {
         private readonly AppDbContext _context;
         private readonly ILogger<PermissionService> _logger;
+        private readonly IMapper _mapper;
 
-        public PermissionService(AppDbContext context, ILogger<PermissionService> logger)
+        public PermissionService(AppDbContext context, ILogger<PermissionService> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<List<PermissionGroupDto>> GetAllPermissionsGrouped(string? module = null)
@@ -29,19 +32,13 @@ namespace Student_management.Services.Implementations
                 }
 
                 var flatList = await query.ToListAsync();
-
+                //AutoMapper
                 var result = flatList
                     .GroupBy(p => p.Module)
                     .Select(g => new PermissionGroupDto
                     {
                         Module = string.IsNullOrEmpty(g.Key) ? "DefaultModule" : g.Key,
-                        Permissions = g.Select(p => new PermissionItemDto
-                        {
-                            PermissionID = p.PermissionID,
-                            PermissionName = p.PermissionName,
-                            PermissionCode = p.PermissionCode,
-                            Description = p.Description
-                        }).ToList()
+                        Permissions = _mapper.Map<List<PermissionItemDto>>(g.ToList())
                     }).ToList();
 
                 return result;
@@ -57,25 +54,12 @@ namespace Student_management.Services.Implementations
         {
             try
             {
-                var permission = new Permission
-                {
-                    PermissionName = dto.PermissionName,
-                    Module = dto.Module,
-                    Description = dto.Description,
-                    PermissionCode = dto.PermissionCode,
-                };
+                //AutoMapper
+                var permission = _mapper.Map<Permission>(dto);
 
                 _context.Permissions.Add(permission);
                 await _context.SaveChangesAsync();
-
-                return new PermissionDto
-                {
-                    PermissionID = permission.PermissionID,
-                    PermissionName = permission.PermissionName,
-                    PermissionCode = permission.PermissionCode,
-                    Module = permission.Module,
-                    Description = permission.Description
-                };
+                return _mapper.Map<PermissionDto>(permission);
             }
             catch (Exception ex)
             {
@@ -95,7 +79,6 @@ namespace Student_management.Services.Implementations
                     _logger.LogWarning("Permission not found for deletion with ID: {id}", id);
                     return false;
                 }
-
                 _context.Permissions.Remove(permission);
                 await _context.SaveChangesAsync();
 
@@ -108,6 +91,7 @@ namespace Student_management.Services.Implementations
                 throw;
             }
         }
+
         public async Task<bool> AssignPermissionToRoleDto(int roleId, List<int> permissionIds)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();

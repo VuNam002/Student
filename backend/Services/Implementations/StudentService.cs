@@ -7,6 +7,7 @@ using Student_management.Enum;
 using Student_management.Models;
 using Student_management.Models.Entities;
 using Student_management.Services.Interfaces;
+using AutoMapper;
 
 namespace Student_management.Services.Implementations
 {
@@ -14,10 +15,13 @@ namespace Student_management.Services.Implementations
     {
         private readonly AppDbContext _context;
         private readonly ILogger<StudentService> _logger;
-        public StudentService(AppDbContext context, ILogger<StudentService> logger)
+        private readonly IMapper _mapper;
+
+        public StudentService(AppDbContext context, ILogger<StudentService> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<PaginationStudent> GetStudentPagination(StudentSearch searchParams)
@@ -45,33 +49,15 @@ namespace Student_management.Services.Implementations
                 var students = await query
                     .Skip((searchParams.Page - 1) * searchParams.PageSize)
                     .Take(searchParams.PageSize)
-                    .Select(s => new StudentDto
-                    {
-                        StudentID = s.StudentID,
-                        PersonID = s.PersonID, 
-                        StudentCode = s.StudentCode,
-                        ClassID = s.ClassID, 
-                        ClassName = s.Class != null ? s.Class.ClassName : null,
-                        EnrollmentDate = s.EnrollmentDate,
-                        GraduationDate = s.GraduationDate,
-                        Status = s.Status,
-                        AccountID = s.AccountID, 
-                        Person = s.Person == null ? null : new PersonDto
-                        {
-                            PersonID = s.Person.PersonID,
-                            FullName = s.Person.FullName,
-                            DateOfBirth = s.Person.DateOfBirth,
-                            Gender = s.Person.Gender,
-                            Email = s.Person.Email,
-                            PhoneNumber = s.Person.PhoneNumber,
-                            Address = s.Person.Address
-                        }
-                    })
                     .ToListAsync();
+                // AutoMapper
+                var studentDtos = _mapper.Map<List<StudentDto>>(students);
+
                 var totalPages = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
+
                 return new PaginationStudent
                 {
-                    Student = students,
+                    Student = studentDtos,
                     TotalCount = totalCount,
                     Page = searchParams.Page,
                     PageSize = searchParams.PageSize,
@@ -100,69 +86,27 @@ namespace Student_management.Services.Implementations
                 }
                 var codeExists = await _context.Students
                     .AnyAsync(s => s.StudentCode == dto.StudentCode && !s.IsDeleted);
-
                 if (codeExists)
                 {
                     throw new InvalidOperationException($"Student code {dto.StudentCode} already exists.");
                 }
-                var person = new Person
-                {
-                    FullName = dto.Person.FullName,
-                    DateOfBirth = dto.Person.DateOfBirth,
-                    Gender = dto.Person.Gender,
-                    Email = dto.Person.Email,
-                    PhoneNumber = dto.Person.PhoneNumber,
-                    Address = dto.Person.Address,
-                    PersonType = "STUDENT",
-                    IsDeleted = false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                var student = new Student
-                {
-                    Person = person, 
-                    StudentCode = dto.StudentCode,
-                    ClassID = dto.ClassID,
-                    EnrollmentDate = dto.EnrollmentDate ?? DateTime.UtcNow,
-                    Status = StudentStatus.Active,
-                    IsDeleted = false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                // AutoMapper
+                var person = _mapper.Map<Person>(dto.Person);
+                var student = _mapper.Map<Student>(dto);
+                student.Person = person;
 
                 _context.Persons.Add(person);
                 _context.Students.Add(student);
 
-                await _context.SaveChangesAsync(); 
-
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                var className = await _context.Classes
-                    .Where(c => c.ClassID == student.ClassID)
-                    .Select(c => c.ClassName)
-                    .FirstOrDefaultAsync();
+                var createdStudent = await _context.Students
+                    .Include(s => s.Person)
+                    .Include(s => s.Class)
+                    .FirstAsync(s => s.StudentID == student.StudentID);
 
-                return new StudentDto
-                {
-                    StudentID = student.StudentID,
-                    StudentCode = student.StudentCode,
-                    ClassID = student.ClassID,
-                    ClassName = className,
-                    EnrollmentDate = student.EnrollmentDate,
-                    Status = student.Status,
-                    PersonID = person.PersonID,
-                    Person = new PersonDto
-                    {
-                        PersonID = person.PersonID,
-                        FullName = person.FullName,
-                        Email = person.Email,
-                        PhoneNumber = person.PhoneNumber,
-                        Address = person.Address,
-                        Gender = person.Gender,
-                        DateOfBirth = person.DateOfBirth,
-                    }
-                };
+                return _mapper.Map<StudentDto>(createdStudent);
             }
             catch (Exception ex)
             {
@@ -186,11 +130,13 @@ namespace Student_management.Services.Implementations
                     _logger.LogWarning("Student with ID {StudentId} not found for editing.", id);
                     return null;
                 }
+
                 var classExists = await _context.Classes.AnyAsync(c => c.ClassID == dto.ClassID && !c.IsDeleted);
                 if (!classExists)
                 {
                     throw new KeyNotFoundException($"Class with ID {dto.ClassID} not found.");
                 }
+
                 if (student.StudentCode != dto.StudentCode)
                 {
                     var codeExists = await _context.Students.AnyAsync(s => s.StudentCode == dto.StudentCode && !s.IsDeleted);
@@ -199,6 +145,7 @@ namespace Student_management.Services.Implementations
                         throw new InvalidOperationException($"Student code {dto.StudentCode} already exists.");
                     }
                 }
+
                 student.StudentCode = dto.StudentCode;
                 student.ClassID = dto.ClassID;
                 student.UpdatedAt = DateTime.UtcNow;
@@ -206,6 +153,7 @@ namespace Student_management.Services.Implementations
                 {
                     student.EnrollmentDate = dto.EnrollmentDate.Value;
                 }
+                // Update Person fields
                 if (student.Person != null && dto.Person != null)
                 {
                     student.Person.FullName = dto.Person.FullName;
@@ -216,11 +164,15 @@ namespace Student_management.Services.Implementations
                     student.Person.DateOfBirth = dto.Person.DateOfBirth;
                     student.Person.UpdatedAt = DateTime.UtcNow;
                 }
-
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                var studentDto = await GetStudentPagination(new StudentSearch { Keyword = student.StudentCode, Page = 1, PageSize = 1 });
-                return studentDto.Student.FirstOrDefault();
+                var updatedStudent = await _context.Students
+                    .Include(s => s.Person)
+                    .Include(s => s.Class)
+                    .Include(s => s.Account)
+                    .FirstAsync(s => s.StudentID == id);
+
+                return _mapper.Map<StudentDto>(updatedStudent);
             }
             catch (Exception ex)
             {
@@ -229,19 +181,22 @@ namespace Student_management.Services.Implementations
                 throw;
             }
         }
+
         public async Task<bool> UpdateStudentStatus(int id, StudentStatus Status)
         {
             try
             {
                 var student = await _context.Students.FindAsync(id);
-                if(student == null)
+                if (student == null)
                 {
                     return false;
                 }
+
                 student.Status = (StudentStatus)(byte)Status;
                 await _context.SaveChangesAsync();
                 return true;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Loi khi cap nhat trang thai");
                 throw;
@@ -257,31 +212,8 @@ namespace Student_management.Services.Implementations
                     .Include(s => s.Class)
                     .Include(s => s.Account)
                     .Where(s => s.StudentID == id && !s.IsDeleted)
-                    .Select(s => new StudentDto
-                    {
-                        StudentID = s.StudentID,
-                        PersonID = s.PersonID,
-                        StudentCode = s.StudentCode,
-                        ClassID = s.ClassID,
-                        ClassName = s.Class != null ? s.Class.ClassName : null,
-                        EnrollmentDate = s.EnrollmentDate,
-                        GraduationDate = s.GraduationDate,
-                        Status = s.Status,
-                        AccountID = s.AccountID,
-                        Person = s.Person == null ? null : new PersonDto
-                        {
-                            PersonID = s.Person.PersonID,
-                            FullName = s.Person.FullName,
-                            DateOfBirth = s.Person.DateOfBirth,
-                            Gender = s.Person.Gender,
-                            Email = s.Person.Email,
-                            PhoneNumber = s.Person.PhoneNumber,
-                            Address = s.Person.Address
-                        }
-                    })
                     .FirstOrDefaultAsync();
-
-                return student;
+                return _mapper.Map<StudentDto>(student);
             }
             catch (Exception ex)
             {

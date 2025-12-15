@@ -16,6 +16,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace Student_management.Services.Implementations
 {
@@ -24,37 +26,31 @@ namespace Student_management.Services.Implementations
         private readonly AppDbContext _context;
         private readonly ILogger<AccountService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public AccountService(AppDbContext context, ILogger<AccountService> logger, IConfiguration configuration)
+        public AccountService(
+            AppDbContext context,
+            ILogger<AccountService> logger,
+            IConfiguration configuration,
+            IMapper mapper)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         public async Task<List<AccountDto>> GetAll()
         {
             try
             {
-                return await _context.Accounts
-                    .AsNoTracking()//tat co che theo doi
-                    .Where(a => !a.IsDeleted == true)
+                var accounts = await _context.Accounts
+                    .AsNoTracking()
+                    .Where(a => !a.IsDeleted)
                     .Include(a => a.Role)
-                    .Select(a => new AccountDto
-                    {
-                        ID = a.AccountID,
-                        Email = a.Email,
-                        RoleID = a.RoleID.ToString(),
-                        RoleName = a.Role != null ? a.Role.RoleName : null,
-                        Avatar = a.Avatar,
-                        Status = a.Status,
-                        FullName = a.FullName,
-                        PhoneNumber = a.PhoneNumber,
-                        CreatedAt = a.CreatedAt,
-                        IsDeleted = a.IsDeleted,
-                        UpdatedAt = a.UpdatedAt
-                    })
                     .ToListAsync();
+
+                return _mapper.Map<List<AccountDto>>(accounts);
             }
             catch (Exception ex)
             {
@@ -66,7 +62,7 @@ namespace Student_management.Services.Implementations
         public async Task<string?> LoginAsync(LoginRequestDto loginRequest)
         {
             if (loginRequest is null) return null;
- 
+
             if (string.IsNullOrEmpty(loginRequest.Email))
             {
                 _logger.LogWarning("Login attempt with empty email.");
@@ -103,7 +99,6 @@ namespace Student_management.Services.Implementations
                 return null;
             }
 
-           
             var inputPasswordHash = HashHelper.ComputeMd5Hash(loginRequest.Password);
 
             if (storedPassword != inputPasswordHash)
@@ -130,9 +125,9 @@ namespace Student_management.Services.Implementations
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] 
+                Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()), 
+                    new Claim(ClaimTypes.NameIdentifier, account.AccountID.ToString()),
                     new Claim(ClaimTypes.Name, account.Email ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(60),
@@ -154,20 +149,9 @@ namespace Student_management.Services.Implementations
                 var account = await _context.Accounts
                     .Include(a => a.Role)
                     .Where(a => a.AccountID == id && a.IsDeleted == false)
-                    .Select(a => new AccountDto
-                    {
-                        ID = a.AccountID,
-                        Email = a.Email,
-                        RoleID = a.RoleID.ToString(),
-                        RoleName = a.Role != null ? a.Role.RoleName : null,
-                        Avatar = a.Avatar,
-                        FullName = a.FullName,
-                        PhoneNumber = a.PhoneNumber,
-                        Status = a.Status,
-                        CreatedAt = a.CreatedAt
-                    }).FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
-                return account;
+                return _mapper.Map<AccountDto>(account);
             }
             catch (Exception ex)
             {
@@ -195,38 +179,17 @@ namespace Student_management.Services.Implementations
                 if (!roleExists)
                     throw new InvalidOperationException($"Role with ID {dto.RoleID} does not exist.");
 
-
-                var newAccount = new Account
-                {
-                    Email = username,
-                    RoleID = dto.RoleID,
-                    Avatar = dto.Avatar,
-                    FullName = dto.FullName,
-                    PhoneNumber = dto.PhoneNumber,
-                    Status = (byte)AccountStatus.Active,
-                    CreatedAt = dto.CreatedAt
-                };
-
+                // AutoMapper
+                var newAccount = _mapper.Map<Account>(dto);
                 newAccount.Password = HashHelper.ComputeMd5Hash(dto.Password);
 
                 _context.Accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
+                var accountWithRole = await _context.Accounts
+                    .Include(a => a.Role)
+                    .FirstAsync(a => a.AccountID == newAccount.AccountID);
 
-                return new AccountDto
-                {
-                    ID = newAccount.AccountID,
-                    Email = newAccount.Email,
-                    RoleID = newAccount.RoleID.ToString(),
-                    Avatar = newAccount.Avatar,
-                    FullName = newAccount.FullName,
-                    PhoneNumber = newAccount.PhoneNumber,
-                    Status = newAccount.Status,
-                    CreatedAt = newAccount.CreatedAt,
-                    RoleName = await _context.Roles
-                        .Where(r => r.RoleID == newAccount.RoleID)
-                        .Select(r => r.RoleName)
-                        .FirstOrDefaultAsync()
-                };
+                return _mapper.Map<AccountDto>(accountWithRole);
             }
             catch (Exception ex)
             {
@@ -239,18 +202,24 @@ namespace Student_management.Services.Implementations
         {
             try
             {
-                var account = await _context.Accounts.Where(a => a.AccountID == id && a.IsDeleted == false).FirstOrDefaultAsync();
+                var account = await _context.Accounts
+                    .Where(a => a.AccountID == id && a.IsDeleted == false)
+                    .FirstOrDefaultAsync();
+
                 if (account == null)
                     throw new KeyNotFoundException($"Tai khoan moi voi ID {id} khong ton tai.");
 
                 var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == dto.RoleID);
                 if (!roleExists)
                     throw new InvalidOperationException($"Role voi ID {dto.RoleID} khong ton tai.");
-                if(!string.IsNullOrEmpty(dto.Email))
+
+                if (!string.IsNullOrEmpty(dto.Email))
                 {
                     var emailCheck = dto.Email.Trim().ToLower();
-                    var isDuplicate = await _context.Accounts.AnyAsync(a => a.Email.ToLower() == emailCheck && a.AccountID != id && !a.IsDeleted);
-                    if(isDuplicate)
+                    var isDuplicate = await _context.Accounts
+                        .AnyAsync(a => a.Email.ToLower() == emailCheck && a.AccountID != id && !a.IsDeleted);
+
+                    if (isDuplicate)
                     {
                         throw new ArgumentException("{\"success\":false,\"errors\":[{\"field\":\"Email\",\"message\":\"Email da ton tai\"}]}");
                     }
@@ -274,24 +243,11 @@ namespace Student_management.Services.Implementations
                 if (dto.CreatedAt != default) account.CreatedAt = dto.CreatedAt;
 
                 await _context.SaveChangesAsync();
+                var accountWithRole = await _context.Accounts
+                    .Include(a => a.Role)
+                    .FirstAsync(a => a.AccountID == account.AccountID);
 
-                var roleName = await _context.Roles
-                    .Where(r => r.RoleID == account.RoleID)
-                    .Select(r => r.RoleName)
-                    .FirstOrDefaultAsync();
-
-                return new AccountDto
-                {
-                    ID = account.AccountID,
-                    Email = account.Email,
-                    RoleID = account.RoleID.ToString(),
-                    Avatar = account.Avatar,
-                    Status = account.Status,
-                    CreatedAt = account.CreatedAt,
-                    RoleName = roleName,
-                    FullName = account.FullName,
-                    PhoneNumber = account.PhoneNumber
-                };
+                return _mapper.Map<AccountDto>(accountWithRole);
             }
             catch (Exception ex)
             {
@@ -305,7 +261,7 @@ namespace Student_management.Services.Implementations
             try
             {
                 var account = await _context.Accounts.FindAsync(id);
-                if (account == null|| account.IsDeleted)
+                if (account == null || account.IsDeleted)
                 {
                     return false;
                 }
@@ -326,7 +282,11 @@ namespace Student_management.Services.Implementations
         {
             try
             {
-                var query = _context.Accounts.AsNoTracking().Include(a => a.Role).Where(a => a.IsDeleted == false).AsQueryable();
+                var query = _context.Accounts
+                    .AsNoTracking()
+                    .Include(a => a.Role)
+                    .Where(a => a.IsDeleted == false)
+                    .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(searchParams.Keyword))
                 {
@@ -345,26 +305,16 @@ namespace Student_management.Services.Implementations
                 var accounts = await query
                     .Skip((searchParams.Page - 1) * searchParams.PageSize)
                     .Take(searchParams.PageSize)
-                    .Select(a => new AccountDto
-                    {
-                        ID = a.AccountID,
-                        Email = a.Email,
-                        RoleID = a.RoleID.ToString(),
-                        RoleName = a.Role != null ? a.Role.RoleName : null,
-                        Avatar = a.Avatar,
-                        FullName = a.FullName,
-                        PhoneNumber = a.PhoneNumber,
-                        Status = a.Status,
-                        CreatedAt = a.CreatedAt
-                    })
                     .ToListAsync();
 
-               //Pagination
+                // AutoMapper
+                var accountDtos = _mapper.Map<List<AccountDto>>(accounts);
+
                 var totalPages = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
 
                 return new Pagination
                 {
-                    Account = accounts,
+                    Account = accountDtos,
                     TotalCount = totalCount,
                     Page = searchParams.Page,
                     PageSize = searchParams.PageSize,

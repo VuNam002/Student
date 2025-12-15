@@ -57,6 +57,8 @@ builder.Services.AddControllers()
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddScoped<EditAccountValidator>();
 
+//AUTOMAPPER 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -91,7 +93,5 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
-
 app.ConfigureMiddlewarePipeline(MyAllowSpecificOrigins);
 app.Run();
