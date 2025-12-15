@@ -9,6 +9,7 @@ namespace Student_management.DTOs.Student
         public string? StudentCode { get; set; }
         public int PersonID { get; set; }
         public int ClassID { get; set; }
+      
         public DateTime? EnrollmentDate { get; set; }
         public DateTime? GraduationDate { get; set; }
         public StudentStatus Status { get; set; } = StudentStatus.Active;

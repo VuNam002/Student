@@ -14,7 +14,8 @@ namespace Student_management.Mappings
             CreateMap<Student, StudentDto>()
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src =>
                     src.Class != null ? src.Class.ClassName : null))
-                .ForMember(dest => dest.Person, opt => opt.MapFrom(src => src.Person));
+                .ForMember(dest => dest.Person, opt => opt.MapFrom(src => src.Person))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Class != null ? src.Class.ClassName : null));
 
             CreateMap<Person, PersonDto>();
 
@@ -38,6 +39,15 @@ namespace Student_management.Mappings
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.PersonID, opt => opt.Ignore())
                 .ForMember(dest => dest.Student, opt => opt.Ignore());
+
+            CreateMap<Student, StudentListItemDto>()
+                .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentID.ToString()))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src =>
+                    src.Person != null ? src.Person.FullName : null))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src =>
+                    src.Person != null ? src.Person.Email : null))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src =>
+                    src.Person != null ? src.Person.PhoneNumber : null));
         }
     }
 }

@@ -101,5 +101,36 @@ namespace Student_management.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpGet("by-class/{classId}")]
+        public async Task<ActionResult<StudentListResponse>> GetStudentsByClass(int classId)
+        {
+            try
+            {
+                var result = await _studentService.GetStudentsByClass(classId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting students by class.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpPost("classes/{classId}/students")]
+        public async Task<IActionResult> AddStudentsToClass(int classId, [FromBody] List<int> studentIds)
+        {
+            var result = await _studentService.AddStudentsToClass(classId, studentIds);
+            return Ok(result);
+        }
+
+        [HttpDelete("classes/{classId}/students/{studentId}")]
+        public async Task<IActionResult> RemoveStudentFromClass(int classId, int studentId)
+        {
+            var result = await _studentService.RemoveStudentFromClass(classId, studentId);
+            return Ok(result);
+        }
     }
 }

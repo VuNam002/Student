@@ -23,7 +23,8 @@ namespace Student_management.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
+            modelBuilder.Entity<Class>()
+                .ToTable("Class", tb => tb.UseSqlOutputClause(false));
             base.OnModelCreating(modelBuilder);
         }
     }
