@@ -1,0 +1,45 @@
+2025-12-15 12:23:34.175 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 54.0065 ms
+2025-12-15 12:23:34.250 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 13.4781 ms
+2025-12-15 12:23:47.792 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-15 12:23:47.794 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-15 12:23:47.876 +07:00 [ERR] An error occurred while getting paginated classes.
+AutoMapper.AutoMapperMappingException: Error mapping types.
+
+Mapping types:
+List`1 -> List`1
+System.Collections.Generic.List`1[[Student_management.Models.Entities.Class, Student_management, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Student_management.DTOs.Class.ClassDto, Student_management, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]
+ ---> AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.
+
+Mapping types:
+Class -> ClassDto
+Student_management.Models.Entities.Class -> Student_management.DTOs.Class.ClassDto
+   at lambda_method45(Closure, Class, ClassDto, ResolutionContext)
+   at lambda_method44(Closure, Object, List`1, ResolutionContext)
+   --- End of inner exception stack trace ---
+   at lambda_method44(Closure, Object, List`1, ResolutionContext)
+   at Student_management.Services.Implementations.ClassService.GetClassPagination(ClassSearch searchParams) in C:\Student\backend\Services\Implementations\ClassService.cs:line 47
+2025-12-15 12:23:47.891 +07:00 [ERR] An error occurred while getting class pagination.
+AutoMapper.AutoMapperMappingException: Error mapping types.
+
+Mapping types:
+List`1 -> List`1
+System.Collections.Generic.List`1[[Student_management.Models.Entities.Class, Student_management, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Student_management.DTOs.Class.ClassDto, Student_management, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]
+ ---> AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.
+
+Mapping types:
+Class -> ClassDto
+Student_management.Models.Entities.Class -> Student_management.DTOs.Class.ClassDto
+   at lambda_method45(Closure, Class, ClassDto, ResolutionContext)
+   at lambda_method44(Closure, Object, List`1, ResolutionContext)
+   --- End of inner exception stack trace ---
+   at lambda_method44(Closure, Object, List`1, ResolutionContext)
+   at Student_management.Services.Implementations.ClassService.GetClassPagination(ClassSearch searchParams) in C:\Student\backend\Services\Implementations\ClassService.cs:line 47
+   at Student_management.Controllers.ClassController.GetClassPagination(ClassSearch classSearch) in C:\Student\backend\Controllers\ClassControllers.cs:line 30
+2025-12-15 12:23:47.896 +07:00 [ERR] HTTP GET /api/Class/pagination responded 500 in 993.2635 ms
+2025-12-15 12:24:17.741 +07:00 [INF] HTTP GET /WeatherForecast responded 200 in 19.7337 ms
+2025-12-15 13:10:44.031 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 44.6966 ms
+2025-12-15 13:10:44.123 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 25.0410 ms
+2025-12-15 13:15:24.754 +07:00 [INF] HTTP OPTIONS /api/Role responded 204 in 2.2516 ms
+2025-12-15 13:15:24.754 +07:00 [INF] HTTP OPTIONS /api/Role responded 204 in 2.2637 ms
+2025-12-15 13:15:25.702 +07:00 [INF] HTTP GET /api/Role responded 200 in 943.6980 ms
+2025-12-15 13:15:25.717 +07:00 [INF] HTTP GET /api/Role responded 200 in 14.2100 ms

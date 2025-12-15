@@ -9,8 +9,21 @@ using Student_management.Services.Interfaces;
 using Student_management.Validators;
 using Student_management.Middlewares;
 using System.Text;
+using Serilog;
 
+// Cấu hình Serilog ban đầu để bắt lỗi khởi động (Startup errors)
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try {
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddAuthentication(options =>
@@ -94,5 +107,17 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
+
 app.ConfigureMiddlewarePipeline(MyAllowSpecificOrigins);
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
