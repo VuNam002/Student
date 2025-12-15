@@ -1,4 +1,4 @@
-import { LoginResponse, AccountDetail, PermissionGroupDto, RoleDto, PermissionDto, Student } from "./types";
+import { LoginResponse, AccountDetail, PermissionGroupDto, RoleDto, PermissionDto, Student, ClassPagination } from "./types";
 
 const API_URL = "http://localhost:5262/api";
 
@@ -453,6 +453,39 @@ export async function fetchCreateStudent(newStudent:any) {
     return response?.data || response;
   } catch (error) {
     console.error("Fetch create student API error:", error);
+    return null;
+  }
+}
+
+export async function fetchClasses() {
+  try {
+    const response = await api<ClassPagination>(`${API_URL}/Class/pagination?PageSize=100`, { method: "GET" });
+    return response;
+  } catch (error) {
+    console.error("Fetch classes API error:", error);
+    return null;
+  }
+}
+
+export async function fetchClassesPaginated(
+  Page: number = 1,
+  pageSize: number = 10,
+  Keyword: string = ""
+) {
+  const params = new URLSearchParams({
+    Page: Page.toString(),
+    PageSize: pageSize.toString(),
+  });
+
+  if (Keyword) {
+    params.append("Keyword", Keyword);
+  }
+
+  try {
+    const response = await api<ClassPagination>(`${API_URL}/Class/pagination?${params.toString()}`, { method: "GET" });
+    return response;
+  } catch (error) {
+    console.error("Fetch classes paginated API error:", error);
     return null;
   }
 }

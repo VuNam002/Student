@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
-import { fetchCreateStudent } from '@/app/lib/api';
+import { fetchCreateStudent, fetchClasses } from '@/app/lib/api';
 
 const statusConfig = {
     1 : {label: "Đang học"},
@@ -31,11 +31,18 @@ interface FormData {
   };
 }
 
+interface ClassItem {
+  ClassId: number;
+  ClassName: string;
+}
+
 export default function CreateStudentPage() {
   const router = useRouter();
+  const [classes, setClasses] = useState<ClassItem[]>([]);
   const [formData, setFormData] = useState<FormData>({
     StudentCode: "",
     ClassID: 0,
+    
     Status: 1,
     EnrollmentDate: new Date().toISOString().split('T')[0],
     Person: {
@@ -47,6 +54,18 @@ export default function CreateStudentPage() {
       Address: "",
     },
   });
+
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const data = await fetchClasses();
+        setClasses(data?.Classes || []);
+      } catch (error) {
+        console.error("Failed to fetch classes:", error);
+      }
+    };
+    loadClasses();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -120,14 +139,19 @@ export default function CreateStudentPage() {
                   <Input id="StudentCode" name="StudentCode" value={formData.StudentCode} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="ClassID" className="font-medium">Mã lớp (ID)</label>
-                  <Input id="ClassID" name="ClassID" type="number" value={formData.ClassID} onChange={handleChange} required />
+                  <label htmlFor="ClassID" className="font-medium">Lớp</label>
+                  <select id="ClassID" name="ClassID" value={formData.ClassID} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black" required>
+                    <option value={0}>-- Chọn lớp --</option>
+                    {classes.map((cls) => (
+                      <option key={cls.ClassId} value={cls.ClassId}>{cls.ClassName}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label htmlFor="Status" className="font-medium">Trạng thái</label>
-                  <select id="Status" name="Status" value={formData.Status} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select id="Status" name="Status" value={formData.Status} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black">
                     {Object.entries(statusConfig).map(([key, { label }]) => (
                       <option key={key} value={key}>{label}</option>
                     ))}

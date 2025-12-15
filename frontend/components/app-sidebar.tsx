@@ -12,7 +12,8 @@ import {
   Settings2,
   LayoutDashboard,
   CircleUserRound,
-  SquareUser 
+  SquareUser,
+  School  ,
 } from "lucide-react"
 
 import { NavMain } from "../components/nav-main"
@@ -90,6 +91,21 @@ const navMain = [
         url: "/admin/student/created",
       } 
     ],
+  },
+  {
+    title: "Lớp",
+    url: "#",
+    icon: School ,
+    items: [
+      {
+        title: "Danh sách lớp",
+        url: "/admin/class",
+      },
+      {
+        title: "Thêm lớp",
+        url: "/admin/class/created",
+      }
+    ]
   },
   {
     title: "Settings",
