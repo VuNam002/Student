@@ -448,3 +448,297 @@ System.Collections.Generic.KeyNotFoundException: Khong thay lop hoc
 2025-12-16 10:25:05.501 +07:00 [INF] HTTP GET /api/Student/export-by-class/1 responded 404 in 0.2186 ms
 2025-12-16 10:25:05.669 +07:00 [INF] HTTP GET /api/Student/export-by-class/1 responded 404 in 0.2390 ms
 2025-12-16 10:25:05.845 +07:00 [INF] HTTP GET /api/Student/export-by-class/1 responded 404 in 0.2121 ms
+2025-12-16 10:34:51.457 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 38.2227 ms
+2025-12-16 10:34:51.705 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 10.8378 ms
+2025-12-16 10:46:48.330 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 40.7386 ms
+2025-12-16 10:46:48.564 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 12.4599 ms
+2025-12-16 10:47:00.130 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 128
+2025-12-16 10:47:00.144 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 1433.8519 ms
+2025-12-16 10:47:13.652 +07:00 [ERR] An error occurred while exporting students for class ID 2
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 128
+2025-12-16 10:47:13.654 +07:00 [ERR] HTTP GET /api/Class/2/export-students responded 500 in 14.3530 ms
+2025-12-16 10:47:33.994 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 1.9483 ms
+2025-12-16 10:47:33.996 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.2320 ms
+2025-12-16 10:47:34.166 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 167.8693 ms
+2025-12-16 10:47:34.171 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 4.9718 ms
+2025-12-16 10:47:37.660 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.1857 ms
+2025-12-16 10:47:37.708 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 10:47:37.710 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 10:47:37.759 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 89.6927 ms
+2025-12-16 10:47:39.626 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.2037 ms
+2025-12-16 10:47:39.627 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1315 ms
+2025-12-16 10:47:39.656 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 26.3218 ms
+2025-12-16 10:47:39.659 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 2.1802 ms
+2025-12-16 10:47:40.592 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0789 ms
+2025-12-16 10:47:40.599 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 128
+2025-12-16 10:47:40.601 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 6.3180 ms
+2025-12-16 10:47:40.984 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 128
+2025-12-16 10:47:40.987 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 5.4032 ms
+2025-12-16 10:49:10.715 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 46.2921 ms
+2025-12-16 10:49:10.959 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 11.0661 ms
+2025-12-16 10:49:19.278 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 128
+2025-12-16 10:49:19.285 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 863.9441 ms
+2025-12-16 10:59:46.040 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 41.8335 ms
+2025-12-16 10:59:46.285 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 16.9248 ms
+2025-12-16 10:59:50.574 +07:00 [INF] HTTP GET /api/Account responded 200 in 875.8158 ms
+2025-12-16 10:59:56.905 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseNotSetException: Please set the license using one of the methods on the static property ExcelPackage.License. See https://epplussoftware.com/developers/licensenotsetexception for more information
+   at OfficeOpenXml.ExcelPackage.get_Workbook()
+   at OfficeOpenXml.ExcelPackage.CreateBlankWb()
+   at OfficeOpenXml.ExcelPackage.ConstructNewFile(String password)
+   at OfficeOpenXml.ExcelPackage..ctor()
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 130
+2025-12-16 10:59:56.916 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 129.5904 ms
+2025-12-16 11:00:07.527 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 3.1977 ms
+2025-12-16 11:00:07.527 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 3.1799 ms
+2025-12-16 11:00:07.527 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1083 ms
+2025-12-16 11:00:07.529 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0980 ms
+2025-12-16 11:00:07.675 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 142.4242 ms
+2025-12-16 11:00:07.682 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 6.3718 ms
+2025-12-16 11:00:07.698 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 167.1239 ms
+2025-12-16 11:00:07.706 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 6.3501 ms
+2025-12-16 11:00:08.911 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0924 ms
+2025-12-16 11:00:08.918 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseNotSetException: Please set the license using one of the methods on the static property ExcelPackage.License. See https://epplussoftware.com/developers/licensenotsetexception for more information
+   at OfficeOpenXml.ExcelPackage.get_Workbook()
+   at OfficeOpenXml.ExcelPackage.CreateBlankWb()
+   at OfficeOpenXml.ExcelPackage.ConstructNewFile(String password)
+   at OfficeOpenXml.ExcelPackage..ctor()
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 130
+2025-12-16 11:00:08.921 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 5.9536 ms
+2025-12-16 11:00:55.989 +07:00 [ERR] An error occurred while exporting students for class ID 1
+OfficeOpenXml.LicenseNotSetException: Please set the license using one of the methods on the static property ExcelPackage.License. See https://epplussoftware.com/developers/licensenotsetexception for more information
+   at OfficeOpenXml.ExcelPackage.get_Workbook()
+   at OfficeOpenXml.ExcelPackage.CreateBlankWb()
+   at OfficeOpenXml.ExcelPackage.ConstructNewFile(String password)
+   at OfficeOpenXml.ExcelPackage..ctor()
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 130
+2025-12-16 11:00:55.991 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 9.1500 ms
+2025-12-16 11:00:58.886 +07:00 [ERR] An error occurred while exporting students for class ID 2
+OfficeOpenXml.LicenseNotSetException: Please set the license using one of the methods on the static property ExcelPackage.License. See https://epplussoftware.com/developers/licensenotsetexception for more information
+   at OfficeOpenXml.ExcelPackage.get_Workbook()
+   at OfficeOpenXml.ExcelPackage.CreateBlankWb()
+   at OfficeOpenXml.ExcelPackage.ConstructNewFile(String password)
+   at OfficeOpenXml.ExcelPackage..ctor()
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 130
+2025-12-16 11:00:58.890 +07:00 [ERR] HTTP GET /api/Class/2/export-students responded 500 in 7.8076 ms
+2025-12-16 11:01:18.807 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.0844 ms
+2025-12-16 11:01:18.847 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 11:01:18.848 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 11:01:18.867 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 57.3345 ms
+2025-12-16 11:01:22.087 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 3.6395 ms
+2025-12-16 11:01:23.159 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1106 ms
+2025-12-16 11:01:23.162 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1097 ms
+2025-12-16 11:01:23.166 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 2.4996 ms
+2025-12-16 11:01:23.169 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 2.2404 ms
+2025-12-16 11:01:27.624 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.2152 ms
+2025-12-16 11:01:27.642 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 6.7363 ms
+2025-12-16 11:09:49.620 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.1647 ms
+2025-12-16 11:09:49.622 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.1071 ms
+2025-12-16 11:09:49.632 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 7.7328 ms
+2025-12-16 11:09:49.634 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 1.8963 ms
+2025-12-16 11:09:50.566 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.0958 ms
+2025-12-16 11:09:50.577 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 7.1287 ms
+2025-12-16 11:10:03.000 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.0975 ms
+2025-12-16 11:10:03.147 +07:00 [INF] Updated class with ID 9
+2025-12-16 11:10:03.149 +07:00 [INF] HTTP PATCH /api/Class/9 responded 200 in 146.0137 ms
+2025-12-16 11:10:03.485 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.0610 ms
+2025-12-16 11:10:03.492 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 4.3353 ms
+2025-12-16 11:10:07.840 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 2.3323 ms
+2025-12-16 11:10:07.845 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 2.8072 ms
+2025-12-16 11:10:08.831 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.0706 ms
+2025-12-16 11:10:08.836 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 2.3199 ms
+2025-12-16 11:12:28.507 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.0694 ms
+2025-12-16 11:12:28.517 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 6.4103 ms
+2025-12-16 11:12:33.071 +07:00 [ERR] An error occurred while exporting students for class ID 2
+OfficeOpenXml.LicenseNotSetException: Please set the license using one of the methods on the static property ExcelPackage.License. See https://epplussoftware.com/developers/licensenotsetexception for more information
+   at OfficeOpenXml.ExcelPackage.get_Workbook()
+   at OfficeOpenXml.ExcelPackage.CreateBlankWb()
+   at OfficeOpenXml.ExcelPackage.ConstructNewFile(String password)
+   at OfficeOpenXml.ExcelPackage..ctor()
+   at Student_management.Controllers.ClassController.ExportStudents(Int32 id) in C:\Student\backend\Controllers\ClassControllers.cs:line 130
+2025-12-16 11:12:33.076 +07:00 [ERR] HTTP GET /api/Class/2/export-students responded 500 in 8.1390 ms
+2025-12-16 11:19:36.770 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 40.8627 ms
+2025-12-16 11:19:36.841 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 8.5961 ms
+2025-12-16 11:19:45.078 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 152.0052 ms
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-12-16 11:19:45.097 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-12-16 11:19:53.158 +07:00 [INF] HTTP GET /api/Account responded 200 in 699.1109 ms
+2025-12-16 11:20:49.902 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 0.4364 ms
+2025-12-16 11:20:49.957 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 9.7180 ms
+2025-12-16 11:20:56.648 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 2.5896 ms
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-12-16 11:20:56.652 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-12-16 11:20:58.349 +07:00 [ERR] HTTP GET /api/Class/1/export-students responded 500 in 1.6531 ms
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-12-16 11:20:58.353 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+OfficeOpenXml.LicenseContextPropertyObsoleteException: Please use the static 'ExcelPackage.License' property to set the required license information from EPPlus 8 and later versions. For more info see http://epplussoftware.com/developers/licensenotsetexception.
+   at OfficeOpenXml.ExcelPackage.set_LicenseContext(Nullable`1 value)
+   at Student_management.Controllers.ClassController..ctor(IClassService classService, ILogger`1 logger) in C:\Student\backend\Controllers\ClassControllers.cs:line 25
+   at lambda_method10(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-12-16 11:21:57.739 +07:00 [INF] HTTP GET /swagger/index.html responded 200 in 41.5981 ms
+2025-12-16 11:21:57.816 +07:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 15.8290 ms
+2025-12-16 11:22:04.621 +07:00 [INF] HTTP GET /api/Class/1/export-students responded 200 in 1852.5096 ms
+2025-12-16 11:22:20.503 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 1.4435 ms
+2025-12-16 11:22:20.503 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 1.5344 ms
+2025-12-16 11:22:20.507 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.5350 ms
+2025-12-16 11:22:20.507 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0634 ms
+2025-12-16 11:22:20.608 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 100.1545 ms
+2025-12-16 11:22:20.619 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 10.0563 ms
+2025-12-16 11:22:20.681 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 171.8073 ms
+2025-12-16 11:22:20.686 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 4.1473 ms
+2025-12-16 11:22:21.861 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.3059 ms
+2025-12-16 11:22:21.868 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 2.9641 ms
+2025-12-16 11:22:25.202 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 2.5583 ms
+2025-12-16 11:23:18.500 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.1501 ms
+2025-12-16 11:23:18.500 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.0383 ms
+2025-12-16 11:23:18.502 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0805 ms
+2025-12-16 11:23:18.502 +07:00 [INF] HTTP OPTIONS /api/Class/9 responded 204 in 0.0564 ms
+2025-12-16 11:23:18.509 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 3.8305 ms
+2025-12-16 11:23:18.511 +07:00 [INF] HTTP GET /api/Class/9 responded 200 in 2.1898 ms
+2025-12-16 11:23:18.513 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 9.4141 ms
+2025-12-16 11:23:18.515 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 1.9128 ms
+2025-12-16 11:23:19.898 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.1060 ms
+2025-12-16 11:23:19.908 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 5.3343 ms
+2025-12-16 11:23:23.260 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.4696 ms
+2025-12-16 11:23:23.295 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 11:23:23.297 +07:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-16 11:23:23.321 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 58.5017 ms
+2025-12-16 11:23:23.746 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0666 ms
+2025-12-16 11:23:23.747 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0572 ms
+2025-12-16 11:23:23.750 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 2.0918 ms
+2025-12-16 11:23:23.753 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 1.7542 ms
+2025-12-16 11:23:24.063 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 4.4548 ms
+2025-12-16 11:23:25.105 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1375 ms
+2025-12-16 11:23:25.105 +07:00 [INF] HTTP OPTIONS /api/Class/1 responded 204 in 0.1115 ms
+2025-12-16 11:23:25.113 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 2.9051 ms
+2025-12-16 11:23:25.116 +07:00 [INF] HTTP GET /api/Class/1 responded 200 in 1.7898 ms
+2025-12-16 11:23:26.248 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0866 ms
+2025-12-16 11:23:26.267 +07:00 [INF] HTTP GET /api/Class/1/export-students responded 200 in 16.7431 ms
+2025-12-16 11:23:39.671 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0765 ms
+2025-12-16 11:23:39.684 +07:00 [INF] HTTP GET /api/Class/1/export-students responded 200 in 10.6371 ms
+2025-12-16 11:23:45.691 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.2062 ms
+2025-12-16 11:23:45.699 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 4.9313 ms
+2025-12-16 11:25:46.533 +07:00 [INF] HTTP OPTIONS /api/Class/3/export-students responded 204 in 0.1242 ms
+2025-12-16 11:25:46.542 +07:00 [INF] HTTP GET /api/Class/3/export-students responded 404 in 5.9052 ms
+2025-12-16 11:25:56.311 +07:00 [INF] HTTP OPTIONS /api/Account/me responded 204 in 0.0687 ms
+2025-12-16 11:25:56.320 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 5.2627 ms
+2025-12-16 11:25:56.326 +07:00 [INF] HTTP GET /api/Account/me responded 200 in 5.0266 ms
+2025-12-16 11:25:56.628 +07:00 [INF] HTTP OPTIONS /api/Class/pagination responded 204 in 0.0546 ms
+2025-12-16 11:25:56.636 +07:00 [INF] HTTP GET /api/Class/pagination responded 200 in 5.2294 ms
+2025-12-16 11:25:58.367 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0569 ms
+2025-12-16 11:25:58.381 +07:00 [INF] HTTP GET /api/Class/1/export-students responded 200 in 11.8464 ms
+2025-12-16 11:26:00.694 +07:00 [INF] HTTP OPTIONS /api/Class/2/export-students responded 204 in 0.0471 ms
+2025-12-16 11:26:00.711 +07:00 [INF] HTTP GET /api/Class/2/export-students responded 200 in 13.8857 ms
+2025-12-16 11:26:11.256 +07:00 [INF] HTTP OPTIONS /api/Class/9/export-students responded 204 in 0.0775 ms
+2025-12-16 11:26:11.263 +07:00 [INF] HTTP GET /api/Class/9/export-students responded 404 in 1.9692 ms
+2025-12-16 11:26:14.645 +07:00 [INF] HTTP OPTIONS /api/Class/3/export-students responded 204 in 0.0489 ms
+2025-12-16 11:26:14.649 +07:00 [INF] HTTP GET /api/Class/3/export-students responded 404 in 1.5438 ms
+2025-12-16 11:26:18.713 +07:00 [INF] HTTP OPTIONS /api/Class/1/export-students responded 204 in 0.0620 ms
+2025-12-16 11:26:18.726 +07:00 [INF] HTTP GET /api/Class/1/export-students responded 200 in 10.9391 ms

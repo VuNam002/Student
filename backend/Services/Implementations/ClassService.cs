@@ -229,5 +229,26 @@ namespace Student_management.Services.Implementations
                 throw;
             }
         }
+
+        public async Task<List<Student>> GetStudentsByClassId(int classId)
+        {
+            try
+            {
+                var students = await _context.Students
+                    .AsNoTracking()
+                    .Where(s => s.ClassID == classId && !s.IsDeleted)
+                    .Include(s => s.Class)
+                    .Include(s => s.Person)
+                    .OrderBy(s => s.StudentID) 
+                    .ToListAsync();
+
+                return students;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting students for export by class ID {ClassId}", classId);
+                throw;
+            }
+        }
     }
 }
