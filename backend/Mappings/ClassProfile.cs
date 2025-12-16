@@ -6,7 +6,7 @@ namespace Student_management.Mappings
     {
         public ClassProfile()
         {
-            // Class Entity -> ClassDto (để trả về API)
+            // Class Entity -> ClassDto 
             CreateMap<Models.Entities.Class, DTOs.Class.ClassDto>()
                 .ForMember(dest => dest.DepartmentName,
                     opt => opt.MapFrom(src => src.Department != null ? src.Department.DepartmentName : null))
@@ -22,7 +22,7 @@ namespace Student_management.Mappings
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
 
-            // ClassDto -> Class Entity (để nhận từ API)
+            // ClassDto -> Class Entity 
             CreateMap<DTOs.Class.ClassDto, Models.Entities.Class>()
                 .ForMember(dest => dest.Department, opt => opt.Ignore())
                 .ForMember(dest => dest.Teacher, opt => opt.Ignore())

@@ -37,11 +37,11 @@ namespace Student_management.Controllers
             }
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClassDto>> GetClassById(int classId)
+        public async Task<ActionResult<ClassDto>> GetClassById(int id)
         {
             try
             {
-                var classSutdent = await _classService.GetClassById(classId);
+                var classSutdent = await _classService.GetClassById(id);
                 if(classSutdent == null)
                 {
                     return NotFound("Class not found");
