@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { fetchClassesPaginated } from "@/app/lib/api";
+import { fetchClassesPaginated, fetchExportStudentByClass } from "@/app/lib/api";
 import { ClassDto } from "@/app/lib/types";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2, FileDown } from "lucide-react";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   Table,
   TableBody,
@@ -75,6 +77,14 @@ export default function ClassPage() {
       const params = new URLSearchParams(searchParams.toString());
       params.set("page", "1");
       router.replace(`/admin/class?${params.toString()}`);
+  };
+
+  const handleExport = async (classId: number) => {
+    toast.info("Đang tải xuống danh sách...");
+    const success = await fetchExportStudentByClass(classId);
+    if (!success) {
+      toast.error("Xuất file thất bại.");
+    }
   };
 
   const renderPaginationItems = () => {
@@ -210,6 +220,9 @@ export default function ClassPage() {
                         <div className="flex justify-center gap-2">
                           <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/class/edit?id=${cls.ClassId}`)}>
                             <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleExport(cls.ClassId)} title="Xuất danh sách SV">
+                            <FileDown className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700 hover:bg-red-50">
                             <Trash2 className="h-4 w-4" />

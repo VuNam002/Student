@@ -529,8 +529,8 @@ export async function fetchEditClass(id:number,editClass:any ) {
 export async function fetchExportStudentByClass(classId: number) {
   try {
     const token = localStorage.getItem("token");
-    // Giả định endpoint backend là /Student/export-by-class/{id}
-    const response = await fetch(`${API_URL}/Student/export-by-class/${classId}`, {
+    // Endpoint xuất Excel danh sách sinh viên theo lớp (Class Controller)
+    const response = await fetch(`${API_URL}/Class/${classId}/export-students`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
