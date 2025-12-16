@@ -1,4 +1,4 @@
-import { LoginResponse, AccountDetail, PermissionGroupDto, RoleDto, PermissionDto, Student } from "./types";
+import { LoginResponse, AccountDetail, PermissionGroupDto, RoleDto, PermissionDto, Student, ClassPagination } from "./types";
 
 const API_URL = "http://localhost:5262/api";
 
@@ -453,6 +453,117 @@ export async function fetchCreateStudent(newStudent:any) {
     return response?.data || response;
   } catch (error) {
     console.error("Fetch create student API error:", error);
+    return null;
+  }
+}
+
+export async function fetchClasses() {
+  try {
+    const response = await api<ClassPagination>(`${API_URL}/Class/pagination?PageSize=100`, { method: "GET" });
+    return response;
+  } catch (error) {
+    console.error("Fetch classes API error:", error);
+    return null;
+  }
+}
+
+export async function fetchClassesPaginated(
+  Page: number = 1,
+  pageSize: number = 10,
+  Keyword: string = ""
+) {
+  const params = new URLSearchParams({
+    Page: Page.toString(),
+    PageSize: pageSize.toString(),
+  });
+
+  if (Keyword) {
+    params.append("Keyword", Keyword);
+  }
+
+  try {
+    const response = await api<ClassPagination>(`${API_URL}/Class/pagination?${params.toString()}`, { method: "GET" });
+    return response;
+  } catch (error) {
+    console.error("Fetch classes paginated API error:", error);
+    return null;
+  }
+}
+
+export async function fetchClassById(id: number) {
+  try {
+    const response = await api<any>(`${API_URL}/Class/${id}`, { method: "GET" });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch class by ID API error:", error);
+    return null;
+  }
+}
+
+export async function fetchCreateClass(newClass:any) {
+  try {
+    const response = await api<any>(`${API_URL}/Class`, {
+      method: "POST",
+      body: JSON.stringify(newClass),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch create class API error:", error);
+    return null;
+  }
+}
+
+export async function fetchEditClass(id:number,editClass:any ) {
+  try {
+    const response = await api<any>(`${API_URL}/Class/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(editClass),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch edit class API error:", error);
+    return null;
+  }
+}
+
+export async function fetchExportStudentByClass(classId: number) {
+  try {
+    const token = localStorage.getItem("token");
+    // Endpoint xuất Excel danh sách sinh viên theo lớp (Class Controller)
+    const response = await fetch(`${API_URL}/Class/${classId}/export-students`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Export failed");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `DanhSachSinhVien_Lop_${classId}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return true;
+  } catch (error) {
+    console.error("Export student by class API error:", error);
+    return false;
+  }
+}
+
+export async function fetchStudentByClass(id: number) {
+  try {
+    const response = await api<any>(
+      `${API_URL}/Student/by-class/${id}`,
+      { method: "GET" }
+    );
+
+    return response?.data ?? response;
+  } catch (error) {
+    console.error("Fetch student by class API error:", error);
     return null;
   }
 }

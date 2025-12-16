@@ -122,3 +122,29 @@ export interface StudentDto {
     Address: string;
   };
 }
+
+export interface ClassDto {
+  ClassId: number;
+  ClassCode: string;
+  ClassName: string;
+  DepartmentId: number;
+  DepartmentName: string;
+  TeacherId: number;
+  TeacherName: string;
+  AcademicYear: string;
+  Semester: number;
+  TotalStudents: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  IsDeleted: boolean;
+}
+
+export interface ClassPagination {
+  Classes: ClassDto[];
+  TotalCount: number;
+  Page: number;
+  PageSize: number;
+  TotalPages: number;
+  HasPrevious: boolean;
+  HasNext: boolean;
+}

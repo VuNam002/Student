@@ -2,6 +2,7 @@
 using Student_management.Data;
 using Student_management.DTOs.Role;
 using Student_management.Services.Interfaces;
+using AutoMapper;
 
 namespace Student_management.Services.Implementations
 {
@@ -9,31 +10,25 @@ namespace Student_management.Services.Implementations
     {
         private readonly AppDbContext _context;
         private readonly ILogger<RoleService> _logger;
+        private readonly IMapper _mapper;
 
-        public RoleService(AppDbContext context, ILogger<RoleService> logger)
+        public RoleService(AppDbContext context, ILogger<RoleService> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<List<RoleDto>> GetAll()
         {
             try
             {
-                return await _context.Roles
+                var roles = await _context.Roles
                     .Include(r => r.RolePermissions)
                     .Where(r => r.IsDeleted == false)
-                    .Select(r => new RoleDto
-                    {
-                        RoleID = r.RoleID,
-                        RoleName = r.RoleName,
-                        RoleCode = r.RoleCode,
-                        Description = r.Description,
-                        IsDeleted = r.IsDeleted,
-                        CreatedAt = r.CreatedAt,
-                        PermissionIds = r.RolePermissions != null ? r.RolePermissions.Select(rp => rp.PermissionID).ToList() : new List<int>()
-                    })
-                    .ToListAsync(); 
+                    .ToListAsync();
+
+                return _mapper.Map<List<RoleDto>>(roles);
             }
             catch (Exception ex)
             {
@@ -48,18 +43,9 @@ namespace Student_management.Services.Implementations
             {
                 var role = await _context.Roles
                     .Where(r => r.RoleID == id && r.IsDeleted == false)
-                    .Select(r => new RoleDto
-                    {
-                        RoleID = r.RoleID,
-                        RoleName = r.RoleName,
-                        RoleCode = r.RoleCode,
-                        Description = r.Description,
-                        IsDeleted = r.IsDeleted,
-                        CreatedAt = r.CreatedAt
-                    })
                     .FirstOrDefaultAsync();
 
-                return role;
+                return _mapper.Map<RoleDto>(role);
             }
             catch (Exception ex)
             {
@@ -74,31 +60,17 @@ namespace Student_management.Services.Implementations
             {
                 var isExist = await _context.Roles
                     .AnyAsync(r => r.RoleCode == dto.RoleCode && !r.IsDeleted);
-
                 if (isExist)
                 {
                     throw new InvalidOperationException($"Role with code '{dto.RoleCode}' already exists.");
                 }
+                //AutoMapper
+                var newRole = _mapper.Map<Role>(dto);
 
-                var newRole = new Role
-                {
-                    RoleCode = dto.RoleCode,
-                    RoleName = dto.RoleName,
-                    Description = dto.Description,
-                    IsDeleted = false,
-                    CreatedAt = DateTime.UtcNow 
-                };
                 await _context.Roles.AddAsync(newRole);
                 await _context.SaveChangesAsync();
-                return new RoleDto
-                {
-                    RoleID = newRole.RoleID,
-                    RoleName = newRole.RoleName,
-                    RoleCode = newRole.RoleCode,
-                    Description = newRole.Description,
-                    IsDeleted = newRole.IsDeleted,
-                    CreatedAt = newRole.CreatedAt
-                };
+
+                return _mapper.Map<RoleDto>(newRole);
             }
             catch (Exception ex)
             {
@@ -106,13 +78,13 @@ namespace Student_management.Services.Implementations
                 throw;
             }
         }
+
         public async Task<RoleDto?> UpdateRole(int id, CreateRole dto)
         {
             try
             {
                 var role = await _context.Roles
                     .FirstOrDefaultAsync(r => r.RoleID == id && !r.IsDeleted);
-
                 if (role == null)
                 {
                     return null;
@@ -124,22 +96,13 @@ namespace Student_management.Services.Implementations
                 {
                     throw new InvalidOperationException($"Role with code '{dto.RoleCode}' already exists.");
                 }
-
+                // Update fields
                 role.RoleCode = dto.RoleCode;
                 role.RoleName = dto.RoleName;
                 role.Description = dto.Description;
 
                 await _context.SaveChangesAsync();
-
-                return new RoleDto
-                {
-                    RoleID = role.RoleID,
-                    RoleName = role.RoleName,
-                    RoleCode = role.RoleCode,
-                    Description = role.Description,
-                    IsDeleted = role.IsDeleted,
-                    CreatedAt = role.CreatedAt
-                };
+                return _mapper.Map<RoleDto>(role);
             }
             catch (Exception ex)
             {
@@ -161,7 +124,6 @@ namespace Student_management.Services.Implementations
                 }
                 role.IsDeleted = true;
                 await _context.SaveChangesAsync();
-
                 return true;
             }
             catch (Exception ex)
