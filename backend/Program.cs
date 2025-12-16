@@ -11,7 +11,7 @@ using Student_management.Middlewares;
 using System.Text;
 using Serilog;
 
-// Cấu hình Serilog ban đầu để bắt lỗi khởi động (Startup errors)
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
