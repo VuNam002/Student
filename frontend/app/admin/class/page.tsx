@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { fetchClassesPaginated } from "@/app/lib/api";
 import { ClassDto } from "@/app/lib/types";
-import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -179,7 +179,7 @@ export default function ClassPage() {
                   <TableHead className="px-4 py-3 font-medium">Giáo viên CN</TableHead>
                   <TableHead className="px-4 py-3 font-medium">Niên khóa</TableHead>
                   <TableHead className="px-4 py-3 font-medium text-center">Sĩ số</TableHead>
-                  <TableHead className="px-4 py-3 font-medium text-right">Hành động</TableHead>
+                  <TableHead className="px-4 py-3 font-medium text-center">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -207,7 +207,7 @@ export default function ClassPage() {
                       <TableCell className="px-4 py-3">{cls.AcademicYear}</TableCell>
                       <TableCell className="px-4 py-3 text-center">{cls.TotalStudents}</TableCell>
                       <TableCell className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-center gap-2">
                           <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/class/edit?id=${cls.ClassId}`)}>
                             <Pencil className="h-4 w-4" />
                           </Button>

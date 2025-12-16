@@ -489,3 +489,81 @@ export async function fetchClassesPaginated(
     return null;
   }
 }
+
+export async function fetchClassById(id: number) {
+  try {
+    const response = await api<any>(`${API_URL}/Class/${id}`, { method: "GET" });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch class by ID API error:", error);
+    return null;
+  }
+}
+
+export async function fetchCreateClass(newClass:any) {
+  try {
+    const response = await api<any>(`${API_URL}/Class`, {
+      method: "POST",
+      body: JSON.stringify(newClass),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch create class API error:", error);
+    return null;
+  }
+}
+
+export async function fetchEditClass(id:number,editClass:any ) {
+  try {
+    const response = await api<any>(`${API_URL}/Class/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(editClass),
+    });
+    return response?.data || response;
+  } catch (error) {
+    console.error("Fetch edit class API error:", error);
+    return null;
+  }
+}
+
+export async function fetchExportStudentByClass(classId: number) {
+  try {
+    const token = localStorage.getItem("token");
+    // Giả định endpoint backend là /Student/export-by-class/{id}
+    const response = await fetch(`${API_URL}/Student/export-by-class/${classId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Export failed");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `DanhSachSinhVien_Lop_${classId}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return true;
+  } catch (error) {
+    console.error("Export student by class API error:", error);
+    return false;
+  }
+}
+
+export async function fetchStudentByClass(id: number) {
+  try {
+    const response = await api<any>(
+      `${API_URL}/Student/by-class/${id}`,
+      { method: "GET" }
+    );
+
+    return response?.data ?? response;
+  } catch (error) {
+    console.error("Fetch student by class API error:", error);
+    return null;
+  }
+}
