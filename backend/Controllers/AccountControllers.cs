@@ -265,7 +265,7 @@ namespace Student_management.Controllers
                     return BadRequest(new { success = false, message = "ID phai lon hon 0" });
                 }
 
-                if (!System.Enum.IsDefined(typeof(AccountStatus), request.Status))
+                if (!System.Enum.IsDefined(typeof(AccountStatus), (int)request.Status))
                 {
                     return BadRequest(new { success = false, message = "Trang thai khong hop le" });
                 }

@@ -38,7 +38,7 @@ namespace Student_management.Services.Implementations
                 {
                     var keyword = searchParams.Keyword.Trim().ToLower();
                     query = query.Where(c => c.ClassCode!.ToLower().Contains(keyword) ||
-                                             c.ClassName!.ToLower().Contains(keyword)); // Thêm search theo ClassName
+                                             c.ClassName!.ToLower().Contains(keyword)); 
                 }
 
                 var totalCount = await query.CountAsync();

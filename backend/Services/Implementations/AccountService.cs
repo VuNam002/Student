@@ -332,11 +332,14 @@ namespace Student_management.Services.Implementations
         {
             try
             {
-                var account = await _context.Accounts.FindAsync(id);
+                var account = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.AccountID == id && !a.IsDeleted);
+
                 if (account == null)
                     return false;
 
                 account.Status = (byte)Status;
+                account.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
                 return true;
