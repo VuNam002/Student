@@ -163,7 +163,12 @@ export default function ClassPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="w-full p-6 space-y-2">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Danh sách lớp</h1>
+        </div>
+      </div> 
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center space-x-2">
