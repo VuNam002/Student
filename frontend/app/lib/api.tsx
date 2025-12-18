@@ -567,3 +567,66 @@ export async function fetchStudentByClass(id: number) {
     return null;
   }
 }
+
+export async function fetchDepartments() {
+  try {
+    const response = await api<any>(`${API_URL}/Department/paginated?PageSize=100`, { method: "GET" });
+    return response?.Departments || [];
+  } catch (error) {
+    console.error("Fetch departments API error:", error);
+    return null;
+  }
+}
+
+export async function fetchDepartmentPaginated(
+  Page: number = 1,
+  pageSize: number = 10,
+  Keyword: string = ""
+) {
+  const params = new URLSearchParams({
+    Page: Page.toString(),
+    PageSize: pageSize.toString(),
+  });
+
+  if (Keyword) {
+    params.append("Keyword", Keyword);
+  }
+
+  try {
+    const response = await api<any>(`${API_URL}/Department/paginated?${params.toString()}`, { method: "GET" });
+    return response;
+  } catch (error) {
+    console.error("Fetch department paginated API error:", error);
+    return null;
+  }
+}
+
+export async function transferStudentToClass(
+  studentId: number,
+  newClassId: number
+) {
+  try {
+    const response = await api<{
+      message: string;
+      studentId: number;
+      studentCode: string;
+      studentName: string;
+      oldClassId: number | null;
+      oldClassName: string | null;
+      newClassId: number;
+      newClassName: string;
+    }>(
+      `${API_URL}/Student/${studentId}/transfer-class/${newClassId}`,
+      { 
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Transfer student to class API error:", error);
+    throw error;
+  }
+}

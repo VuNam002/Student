@@ -86,10 +86,10 @@ const navMain = [
         title: "Danh sách sinh viên",
         url: "/admin/student",
       },
-      {
-        title: "Thêm sinh viên",
-        url: "/admin/student/created",
-      } 
+      // {
+      //   title: "Thêm sinh viên",
+      //   url: "/admin/student/created",
+      // } 
     ],
   },
   {

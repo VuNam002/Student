@@ -2,20 +2,14 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchAccountById, fetchAccountEdit, fetchRole } from '../../../lib/api';
+import { fetchAccountById, fetchAccountEdit, fetchRole, fetchClasses, fetchDepartments } from '../../../lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ArrowLeft, UploadCloud } from 'lucide-react';
+import { RoleDto } from '@/app/lib/types';
+import type  { FormData } from '@/app/lib/types';
 
-enum AccountStatus {
-  Pending = 0,
-  Active = 1,
-  Suspended = 2,
-  Locked = 3,
-  Expired = 4,
-  Inactive = 5
-}
 
 const statusConfig = {
   0: { label: "Chờ kích hoạt" },
@@ -26,27 +20,40 @@ const statusConfig = {
   5: { label: "Không hoạt động" }
 };
 
-interface FormData {
-  ID: number;
-  Email: string;
-  RoleID: number;
-  Avatar: string | null;
-  Status: number;
-  FullName: string | null;
-  PhoneNumber: string | null;
-  Password?: string;
-}
-
 function EditAccountForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountId = searchParams.get('id');
 
-  const [formData, setFormData] = useState<Partial<FormData>>({});
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<RoleDto[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [selectedRoleName, setSelectedRoleName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+
+  const [formData, setFormData] = useState<FormData>({
+    ID: 0,
+    Email: '',
+    RoleID: '',
+    Avatar: '',
+    Status: 1,
+    FullName: '',
+    PhoneNumber: '',
+    Password: '',
+    DateOfBirth: '',
+    Gender: '',
+    Address: '',
+    IdentityCard: '',
+    DepartmentID: '',
+    Position: '',
+    Degree: '',
+    Specialization: '',  
+    ClassID: '',
+    EnrollmentDate: '',
+  });
 
   useEffect(() => {
     if (!accountId) {
@@ -58,35 +65,52 @@ function EditAccountForm() {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [accountData, rolesData] = await Promise.all([
+        const [accountData, rolesData, classesData, departmentsData] = await Promise.all([
           fetchAccountById(Number(accountId)),
-          fetchRole()
+          fetchRole(),
+          fetchClasses(),
+          fetchDepartments()
         ]);
+
         if (accountData) {
-          const roleId = accountData.RoleID || accountData.roleID || 0;
-          
+          const roleId = (accountData.RoleID || accountData.RoleID || '').toString();
+          const role = rolesData?.find((r: RoleDto) => r.RoleID.toString() === roleId);
+          setSelectedRoleName(role?.RoleName.toLowerCase() || '');
+
           setFormData({
-            ID: accountData.ID,
+            ID: accountData.ID || 0,
             Email: accountData.Email || '',
             RoleID: roleId,
-            Avatar: accountData.Avatar || null,
-            Status: accountData.Status ?? 0,
+            Avatar: accountData.Avatar || '',
+            Status: accountData.Status ?? 1,
             FullName: accountData.FullName || '',
             PhoneNumber: accountData.PhoneNumber || '',
             Password: '',
+            DateOfBirth: accountData.DateOfBirth || '',
+            Gender: accountData.Gender || '',
+            Address: accountData.Address || '',
+            IdentityCard: accountData.IdentityCard || '',
+            DepartmentID: (accountData.DepartmentID || '').toString(),
+            Position: accountData.Position || '',
+            Degree: accountData.Degree || '',
+            Specialization: accountData.Specialization || '',
+            ClassID: (accountData.ClassID || accountData.ClassID || '').toString(),
+            EnrollmentDate: accountData.EnrollmentDate || '',
           });
-
-          console.log("Set FormData with RoleID:", roleId);
         } else {
           setError("Không thể tải dữ liệu tài khoản.");
         }
 
-        if (rolesData && Array.isArray(rolesData)) {
-          console.log("Setting roles:", rolesData);
+        if (rolesData) {
           setRoles(rolesData);
-        } else {
-          console.warn("Roles data is invalid:", rolesData);
-          setRoles([]);
+        }
+
+        if (classesData) {
+          setClasses(classesData.Classes || []);
+        }
+
+        if (departmentsData) {
+          setDepartments(departmentsData);
         }
 
       } catch (err) {
@@ -100,24 +124,32 @@ function EditAccountForm() {
     loadData();
   }, [accountId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const newValue = name === 'Status' || name === 'RoleID' ? Number(value) : value;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormData]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const roleId = e.target.value;
+    const role = roles.find(r => r.RoleID.toString() === roleId);
     
-    console.log(`Field changed: ${name} = ${newValue} (type: ${typeof newValue})`);
+    setFormData(prev => ({ ...prev, RoleID: roleId }));
+    setSelectedRoleName(role?.RoleName.toLowerCase() || '');
     
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: newValue
-    }));
+    if (errors.RoleID) {
+      setErrors(prev => ({ ...prev, RoleID: '' }));
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const CLOUDINARY_CLOUD_NAME = "duzubskpy"; 
-    const CLOUDINARY_UPLOAD_PRESET = "students"; 
+    const CLOUDINARY_CLOUD_NAME = "duzubskpy";
+    const CLOUDINARY_UPLOAD_PRESET = "students";
 
     setIsUploading(true);
     const apiFormData = new FormData();
@@ -145,49 +177,110 @@ function EditAccountForm() {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+
+    if (!formData.FullName.trim()) {
+      newErrors.FullName = "Họ và tên là bắt buộc";
+    }
+
+    if (!formData.Email.trim()) {
+      newErrors.Email = "Email là bắt buộc";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email)) {
+      newErrors.Email = "Email không hợp lệ";
+    }
+
+    if (formData.Password && formData.Password.length < 6) {
+      newErrors.Password = "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+
+    if (!formData.RoleID) {
+      newErrors.RoleID = "Vai trò là bắt buộc";
+    }
+
+    // Teacher validation
+    if (selectedRoleName.includes('teacher') || selectedRoleName.includes('giáo viên')) {
+      if (!formData.DepartmentID) {
+        newErrors.DepartmentID = "ID Khoa là bắt buộc cho giáo viên";
+      }
+    }
+
+    // Student validation
+    if (selectedRoleName.includes('student') || selectedRoleName.includes('sinh viên')) {
+      if (!formData.ClassID) {
+        newErrors.ClassID = "Lớp là bắt buộc cho sinh viên";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!accountId || !formData.ID) return;
     
-    if (!formData.RoleID || formData.RoleID === 0) {
-      alert("Vui lòng chọn vai trò hợp lệ!");
+    if (!validateForm()) {
       return;
     }
 
     const payload: any = {
       Email: formData.Email,
-      RoleID: Number(formData.RoleID),
+      RoleID: parseInt(formData.RoleID),
       Avatar: formData.Avatar,
       Status: Number(formData.Status),
       FullName: formData.FullName,
       PhoneNumber: formData.PhoneNumber,
+      
+      // Person info
+      DateOfBirth: formData.DateOfBirth || null,
+      Gender: formData.Gender || null,
+      Address: formData.Address || null,
+      IdentityCard: formData.IdentityCard || null,
     };
 
+    // Add password if changed
     if (formData.Password && formData.Password.trim() !== '') {
       payload.Password = formData.Password;
     }
 
-    console.log("=== SUBMIT DEBUG ===");
-    console.log("FormData:", formData);
-    console.log("Payload to send:", payload);
+    // Add Teacher fields if role is Teacher
+    if (selectedRoleName.includes('teacher') || selectedRoleName.includes('giáo viên')) {
+      payload.DepartmentID = parseInt(formData.DepartmentID);
+      payload.Position = formData.Position || null;
+      payload.Degree = formData.Degree || null;
+      payload.Specialization = formData.Specialization || null;
+    }
+
+    // Add Student fields if role is Student
+    if (selectedRoleName.includes('student') || selectedRoleName.includes('sinh viên')) {
+      payload.ClassID = parseInt(formData.ClassID);
+      payload.EnrollmentDate = formData.EnrollmentDate || null;
+    }
+
+    console.log("Payload gửi đi:", payload);
 
     try {
       const result = await fetchAccountEdit(Number(accountId), payload);
-      if (result && result.success === false) {
-        const errorMessages = result.errors?.map((err: any) => err.message).join('\n') || "Cập nhật thất bại.";
-        alert("Lỗi: \n" + errorMessages);
-        return;
-      }
-
       if (result) {
         alert("Cập nhật tài khoản thành công!");
         router.push('/admin/account');
       } else {
         alert("Cập nhật tài khoản thất bại.");
       }
-    } catch (err) {
-      console.error("Save error:", err);
-      alert("Đã xảy ra lỗi khi lưu.");
+    } catch (err: any) {
+      console.error("Update error:", err);
+      
+      if (err.response?.data?.errors) {
+        const backendErrors: any = {};
+        err.response.data.errors.forEach((error: any) => {
+          backendErrors[error.field] = error.message;
+        });
+        setErrors(backendErrors);
+      } else if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Đã xảy ra lỗi khi cập nhật tài khoản.");
+      }
     }
   };
 
@@ -213,97 +306,70 @@ function EditAccountForm() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại danh sách
         </Button>
         <Card>
-          <CardHeader>
-            <CardTitle>Chỉnh sửa thông tin tài khoản</CardTitle>
-          </CardHeader>
-          <form onSubmit={handleSave}>
-            <CardContent className="space-y-6">
+          <CardContent className="space-y-6">
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-semibold mb-4">Thông tin tài khoản</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label htmlFor="FullName" className="font-medium">Họ và Tên</label>
-                  <Input 
-                    id="FullName" 
-                    name="FullName" 
-                    value={formData.FullName || ''} 
-                    onChange={handleChange} 
+                  <label htmlFor="Email" className="font-medium">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="Email"
+                    name="Email"
+                    type="email"
+                    value={formData.Email}
+                    onChange={handleChange}
+                    className={errors.Email ? 'border-red-500' : ''}
+                    autoComplete="off"
                   />
+                  {errors.Email && <p className="text-red-500 text-sm">{errors.Email}</p>}
                 </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="Password" className="font-medium">
+                    Mật khẩu mới
+                  </label>
+                  <Input
+                    id="Password"
+                    name="Password"
+                    type="password"
+                    value={formData.Password}
+                    onChange={handleChange}
+                    className={errors.Password ? 'border-red-500' : ''}
+                    placeholder="Để trống nếu không muốn thay đổi"
+                    autoComplete="new-password"
+                  />
+                  {errors.Password && <p className="text-red-500 text-sm">{errors.Password}</p>}
+                </div>
+
                 <div className="space-y-2">
                   <label htmlFor="RoleID" className="font-medium">
-                    Vai trò {roles.length === 0 && <span className="text-red-500 text-sm">(Không có dữ liệu)</span>}
+                    Vai trò <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="RoleID"
                     name="RoleID"
-                    value={formData.RoleID || ''}
-                    onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
+                    value={formData.RoleID}
+                    onChange={handleRoleChange}
+                    className={`w-full p-2 border rounded-md ${errors.RoleID ? 'border-red-500' : 'border-gray-300'}`}
                   >
-                    <option value="" disabled>Chọn một vai trò</option>
-                    {roles && roles.length > 0 ? (
-                      roles.map(role => {
-                        // ✅ Hỗ trợ nhiều cách đặt tên key
-                        const id = role.roleID || role.RoleID || role.id;
-                        const name = role.roleName || role.RoleName || role.name || 'Unknown Role';
-                        
-                        return (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        );
-                      })
-                    ) : (
-                      <option disabled>Không có vai trò nào</option>
-                    )}
+                    <option value="" disabled>Chọn vai trò</option>
+                    {roles.map(role => (
+                      <option key={role.RoleID} value={role.RoleID}>{role.RoleName}</option>
+                    ))}
                   </select>
+                  {errors.RoleID && <p className="text-red-500 text-sm">{errors.RoleID}</p>}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="Email" className="font-medium">Email</label>
-                  <Input 
-                    id="Email" 
-                    name="Email" 
-                    type="email" 
-                    value={formData.Email || ''} 
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="PhoneNumber" className="font-medium">Số điện thoại</label>
-                  <Input 
-                    id="PhoneNumber" 
-                    name="PhoneNumber" 
-                    value={formData.PhoneNumber || ''} 
-                    onChange={handleChange} 
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="Password" className="font-medium">Mật khẩu mới</label>
-                <Input 
-                  id="Password" 
-                  name="Password" 
-                  type="password" 
-                  placeholder="Để trống nếu không muốn thay đổi" 
-                  value={formData.Password || ''}
-                  onChange={handleChange} 
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label htmlFor="Status" className="font-medium">Trạng thái</label>
                   <select
                     id="Status"
                     name="Status"
-                    value={formData.Status ?? 0}
+                    value={formData.Status}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     {Object.entries(statusConfig).map(([key, { label }]) => (
                       <option key={key} value={key}>{label}</option>
@@ -312,42 +378,218 @@ function EditAccountForm() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 mt-4">
                 <label className="font-medium">Avatar</label>
                 <div className="flex items-center gap-4">
-                  {formData.Avatar && formData.Avatar !== "string" && (
-                    <img 
-                      src={formData.Avatar} 
-                      alt="Avatar" 
-                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200" 
+                  {formData.Avatar && (
+                    <img
+                      src={formData.Avatar}
+                      alt="Avatar preview"
+                      className="w-16 h-16 rounded-full object-cover"
                     />
                   )}
-                  <Input 
-                    id="avatar-upload" 
-                    type="file" 
+                  <Input
+                    id="avatar-upload"
+                    type="file"
                     accept="image/*"
-                    onChange={handleImageUpload} 
-                    className="hidden" 
+                    onChange={handleImageUpload}
+                    className="hidden"
                   />
                   <Button type="button" variant="outline" asChild disabled={isUploading}>
                     <label htmlFor="avatar-upload" className="cursor-pointer">
                       <UploadCloud className="mr-2 h-4 w-4" />
-                      {isUploading ? 'Đang tải...' : 'Chọn ảnh'}
+                      Chọn ảnh
                     </label>
                   </Button>
+                  {isUploading && <div className="text-sm text-gray-500">Đang tải lên...</div>}
                 </div>
               </div>
+            </div>
 
-            </CardContent>
-            <CardFooter className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => router.back()}>
-                Hủy
-              </Button>
-              <Button type="submit">
-                Lưu thay đổi
-              </Button>
-            </CardFooter>
-          </form>
+            {/* ========== PERSON INFO ========== */}
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-semibold mb-4">Thông tin cá nhân</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="FullName" className="font-medium">
+                    Họ và Tên <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="FullName"
+                    name="FullName"
+                    value={formData.FullName}
+                    onChange={handleChange}
+                    className={errors.FullName ? 'border-red-500' : ''}
+                  />
+                  {errors.FullName && <p className="text-red-500 text-sm">{errors.FullName}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="DateOfBirth" className="font-medium">Ngày sinh</label>
+                  <Input
+                    id="DateOfBirth"
+                    name="DateOfBirth"
+                    type="date"
+                    value={formData.DateOfBirth}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="Gender" className="font-medium">Giới tính</label>
+                  <select
+                    id="Gender"
+                    name="Gender"
+                    value={formData.Gender}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">-- Chọn --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="PhoneNumber" className="font-medium">Số điện thoại</label>
+                  <Input
+                    id="PhoneNumber"
+                    name="PhoneNumber"
+                    value={formData.PhoneNumber}
+                    onChange={handleChange}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="IdentityCard" className="font-medium">CMND/CCCD</label>
+                  <Input
+                    id="IdentityCard"
+                    name="IdentityCard"
+                    value={formData.IdentityCard}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="Address" className="font-medium">Địa chỉ</label>
+                  <textarea
+                    id="Address"
+                    name="Address"
+                    value={formData.Address}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {(selectedRoleName.includes('teacher') || selectedRoleName.includes('giáo viên')) && (
+              <div className="border-b pb-4  p-4 rounded-md">
+                <h3 className="text-lg font-semibold mb-4">Thông tin Giảng viên</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="DepartmentID" className="font-medium">
+                      ID Khoa <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="DepartmentID"
+                      name="DepartmentID"
+                      value={formData.DepartmentID}
+                      onChange={handleChange}
+                      className={`w-full p-2 border rounded-md ${errors.DepartmentID ? 'border-red-500' : 'border-gray-300'}`}
+                    >
+                      <option value="">-- Chọn Khoa --</option>
+                      {departments.map((dept) => (
+                        <option key={dept.DepartmentID} value={dept.DepartmentID}>{dept.DepartmentName}</option>
+                      ))}
+                    </select>
+                    {errors.DepartmentID && <p className="text-red-500 text-sm">{errors.DepartmentID}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="Position" className="font-medium">Chức vụ</label>
+                    <Input
+                      id="Position"
+                      name="Position"
+                      value={formData.Position}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="Degree" className="font-medium">Học vị</label>
+                    <Input
+                      id="Degree"
+                      name="Degree"
+                      value={formData.Degree}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="Specialization" className="font-medium">Chuyên môn</label>
+                    <Input
+                      id="Specialization"
+                      name="Specialization"
+                      value={formData.Specialization}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ========== STUDENT INFO ========== */}
+            {(selectedRoleName.includes('student') || selectedRoleName.includes('sinh viên')) && (
+              <div className="border-b pb-4 p-4 rounded-md">
+                <h3 className="text-lg font-semibold mb-4">Thông tin học sinh</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="ClassID" className="font-medium">
+                      Lớp <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="ClassID"
+                      name="ClassID"
+                      value={formData.ClassID}
+                      onChange={handleChange}
+                      className={`w-full p-2 border rounded-md ${errors.ClassID ? 'border-red-500' : 'border-gray-300'}`}
+                    >
+                      <option value="">-- Chọn lớp --</option>
+                      {classes.map(cls => (
+                        <option key={cls.ClassId} value={cls.ClassId}>
+                          {cls.ClassName}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.ClassID && <p className="text-red-500 text-sm">{errors.ClassID}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="EnrollmentDate" className="font-medium">Ngày nhập học</label>
+                    <Input
+                      id="EnrollmentDate"
+                      name="EnrollmentDate"
+                      type="date"
+                      value={formData.EnrollmentDate}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Hủy
+            </Button>
+            <Button type="button" onClick={handleSubmit}>
+              Lưu thay đổi
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </>
@@ -355,13 +597,13 @@ function EditAccountForm() {
 }
 
 export default function EditAccountPage() {
-    return (
-        <Suspense fallback={
-          <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          </div>
-        }>
-            <EditAccountForm />
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    }>
+      <EditAccountForm />
+    </Suspense>
+  );
 }

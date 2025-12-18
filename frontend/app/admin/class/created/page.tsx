@@ -1,12 +1,12 @@
 "use client";
  
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import {fetchCreateClass} from '@/app/lib/api';
+import { fetchCreateClass, fetchDepartments, fetchAccount } from '@/app/lib/api';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,7 +32,27 @@ export default function CreateClassPage() {
     Semester: 1,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const depts = await fetchDepartments();
+      if (depts) setDepartments(depts);
+
+      const accs = await fetchAccount(1, 100);
+      if (accs && accs.items) {
+        const teacherList = accs.items.filter((acc: any) => 
+          acc.RoleName?.toLowerCase().includes('teacher') || 
+          acc.RoleName?.toLowerCase().includes('giáo viên')
+        );
+        setTeachers(teacherList);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -82,11 +102,28 @@ export default function CreateClassPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label htmlFor="DepartmentId" className="font-medium">Mã khoa</label>
-                  <Input id="DepartmentId" name="DepartmentId" type="number" value={formData.DepartmentId} onChange={handleChange} required />
+                  <select
+                    id="DepartmentId"
+                    name="DepartmentId"
+                    value={formData.DepartmentId}
+                    onChange={handleChange}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                  >
+                    <option value={0}>-- Chọn Khoa --</option>
+                    {departments.map((dept) => (
+                      <option key={dept.DepartmentID} value={dept.DepartmentID}>{dept.DepartmentName}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="TeacherId" className="font-medium">Mã giảng viên (Teacher ID)</label>
-                  <Input id="TeacherId" name="TeacherId" type="number" value={formData.TeacherId} onChange={handleChange} required />
+                  <label htmlFor="TeacherId" className="font-medium">Giảng viên</label>
+                  <select id="TeacherId" name="TeacherId" value={formData.TeacherId} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required>
+                    <option value={0}>-- Chọn Giảng viên --</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher.ID} value={teacher.ID}>{teacher.FullName} ({teacher.Email})</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

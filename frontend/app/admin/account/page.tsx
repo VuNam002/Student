@@ -44,7 +44,7 @@ export default function ItemsPage() {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const router = useRouter();
   
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     async function loadItems() {

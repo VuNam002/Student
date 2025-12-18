@@ -7,14 +7,24 @@ export interface LoginResponse {
 export interface AccountDetail {
   ID: number;
   Email: string;
-  RoleID?: string;
-  Avatar?: string | null;
+  RoleID: string | number;
+  Avatar: string;
   Status: number;
-  RoleName?: string | null;
-  CreatedAt?: string | null;
-  FullName?: string | null;
-  PhoneNumber?: string | null;
-  Password?: string;
+  FullName: string;
+  PhoneNumber: string;
+  RoleName?: string;
+  DateOfBirth?: string;
+  Gender?: string;
+  Address?: string;
+  IdentityCard?: string;
+  DepartmentID?: number;
+  Position?: string;
+  Degree?: string;
+  Specialization?: string;
+  ClassID?: number;
+  EnrollmentDate?: string;
+  CreatedAt?: string;
+  UpdatedAt?: string;
 }
 
 export interface AccountDto {
@@ -147,4 +157,25 @@ export interface ClassPagination {
   TotalPages: number;
   HasPrevious: boolean;
   HasNext: boolean;
+}
+
+export interface FormData {
+  ID: number;
+  Email: string;
+  RoleID: string;
+  Avatar: string;
+  Status: number;
+  FullName: string;
+  PhoneNumber: string;
+  Password: string;
+  DateOfBirth: string;
+  Gender: string;
+  Address: string;
+  IdentityCard: string;
+  DepartmentID: string;
+  Position: string;
+  Degree: string;
+  Specialization: string;
+  ClassID: string;
+  EnrollmentDate: string;
 }
