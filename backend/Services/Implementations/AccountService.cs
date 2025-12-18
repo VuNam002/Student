@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +10,7 @@ using Student_management.DTOs.Permission;
 using Student_management.Enum;
 using Student_management.Helpers;
 using Student_management.Models;
+using Student_management.Models.Entities;
 using Student_management.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,8 +19,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 namespace Student_management.Services.Implementations
 {
@@ -151,7 +152,50 @@ namespace Student_management.Services.Implementations
                     .Where(a => a.AccountID == id && a.IsDeleted == false)
                     .FirstOrDefaultAsync();
 
-                return _mapper.Map<AccountDto>(account);
+                if (account == null)
+                    return null;
+
+                var accountDto = _mapper.Map<AccountDto>(account);
+
+                // Find Person by Email
+                var person = await _context.Persons
+                    .Where(p => p.Email == account.Email && !p.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (person != null)
+                {
+                    // Map Person data
+                    accountDto.DateOfBirth = person.DateOfBirth;
+                    accountDto.Gender = person.Gender;
+                    accountDto.Address = person.Address;
+                    accountDto.IdentityCard = person.IdentityCard;
+
+                    // Find Teacher if exists
+                    var teacher = await _context.Teachers
+                        .Where(t => t.AccountID == account.AccountID && !t.IsDeleted)
+                        .FirstOrDefaultAsync();
+
+                    if (teacher != null)
+                    {
+                        accountDto.DepartmentID = teacher.DepartmentID;
+                        accountDto.Position = teacher.Position;
+                        accountDto.Degree = teacher.Degree;
+                        accountDto.Specialization = teacher.Specialization;
+                    }
+
+                    // Find Student if exists
+                    var student = await _context.Students
+                        .Where(s => s.AccountID == account.AccountID && !s.IsDeleted)
+                        .FirstOrDefaultAsync();
+
+                    if (student != null)
+                    {
+                        accountDto.ClassID = student.ClassID;
+                        accountDto.EnrollmentDate = student.EnrollmentDate;
+                    }
+                }
+
+                return accountDto;
             }
             catch (Exception ex)
             {
@@ -162,29 +206,130 @@ namespace Student_management.Services.Implementations
 
         public async Task<AccountDto> CreateAccount(CreateAccount dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 var username = dto.Email?.Trim();
                 if (string.IsNullOrWhiteSpace(username))
-                    throw new InvalidOperationException("TenDangNhap is required.");
+                    throw new InvalidOperationException("Email is required.");
 
                 if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
-                    throw new InvalidOperationException("MatKhau is required and must be at least 6 characters.");
+                    throw new InvalidOperationException("Password is required and must be at least 6 characters.");
+
+                if (string.IsNullOrWhiteSpace(dto.FullName))
+                    throw new InvalidOperationException("FullName is required.");
 
                 var exists = await _context.Accounts.AnyAsync(a => a.Email == username);
                 if (exists)
-                    throw new InvalidOperationException($"Username '{username}' already exists.");
+                    throw new InvalidOperationException($"Email '{username}' already exists.");
 
-                var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == dto.RoleID);
-                if (!roleExists)
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleID == dto.RoleID);
+                if (role == null)
                     throw new InvalidOperationException($"Role with ID {dto.RoleID} does not exist.");
 
-                // AutoMapper
-                var newAccount = _mapper.Map<Account>(dto);
-                newAccount.Password = HashHelper.ComputeMd5Hash(dto.Password);
+                var newPerson = new Person
+                {
+                    PersonType = role.RoleName ?? "Other",
+                    FullName = dto.FullName,
+                    DateOfBirth = dto.DateOfBirth,
+                    Gender = dto.Gender,
+                    Email = dto.Email,
+                    PhoneNumber = dto.PhoneNumber,
+                    Address = dto.Address,
+                    IdentityCard = dto.IdentityCard,
+                    IsDeleted = false,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
+                _context.Persons.Add(newPerson);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($" Created Person ID: {newPerson.PersonID}");
+                var newAccount = new Account
+                {
+                    Email = dto.Email,
+                    Password = HashHelper.ComputeMd5Hash(dto.Password),
+                    RoleID = dto.RoleID,
+                    Avatar = dto.Avatar,
+                    FullName = dto.FullName,
+                    PhoneNumber = dto.PhoneNumber,
+                    Status = dto.Status,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
 
                 _context.Accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation($" Created Account ID: {newAccount.AccountID}");
+
+                var roleName = role.RoleName?.ToLower().Trim();
+
+                if (roleName == "teacher" || roleName == "giáo viên" || roleName == "gv")
+                {
+                    if (!dto.DepartmentID.HasValue)
+                        throw new InvalidOperationException("DepartmentID is required for Teacher role.");
+
+                    var departmentExists = await _context.Departments
+                        .AnyAsync(d => d.DepartmentID == dto.DepartmentID.Value && !d.IsDeleted);
+                    if (!departmentExists)
+                        throw new InvalidOperationException($"Department with ID {dto.DepartmentID} does not exist.");
+
+                    var teacher = new Teacher
+                    {
+                        PersonID = newPerson.PersonID,
+                        TeacherCode = await GenerateTeacherCode(),
+                        DepartmentID = dto.DepartmentID.Value,
+                        Position = dto.Position ?? "Giảng viên",
+                        Degree = dto.Degree,
+                        Specialization = dto.Specialization,
+                        AccountID = newAccount.AccountID,
+                        IsDeleted = false,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _context.Teachers.Add(teacher);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($" Created Teacher ID: {teacher.TeacherID}, Code: {teacher.TeacherCode}");
+                }
+                else if (roleName == "student" || roleName == "sinh viên" || roleName == "sv")
+                {
+                    if (!dto.ClassID.HasValue)
+                        throw new InvalidOperationException("ClassID is required for Student role.");
+
+                    var classExists = await _context.Classes
+                        .AnyAsync(c => c.ClassID == dto.ClassID.Value && !c.IsDeleted);
+                    if (!classExists)
+                        throw new InvalidOperationException($"Class with ID {dto.ClassID} does not exist.");
+
+                    var student = new Student
+                    {
+                        PersonID = newPerson.PersonID,
+                        StudentCode = await GenerateStudentCode(),
+                        ClassID = dto.ClassID.Value,
+                        EnrollmentDate = dto.EnrollmentDate ?? DateTime.Now,
+                        Status = StudentStatus.Active,
+                        AccountID = newAccount.AccountID,
+                        IsDeleted = false,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _context.Students.Add(student);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($" Created Student ID: {student.StudentID}, Code: {student.StudentCode}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Role '{roleName}' is neither Teacher nor Student.");
+                }
+                await transaction.CommitAsync();
+                _logger.LogInformation($" Successfully created account for: {dto.FullName}");
+
                 var accountWithRole = await _context.Accounts
                     .Include(a => a.Role)
                     .FirstAsync(a => a.AccountID == newAccount.AccountID);
@@ -193,13 +338,16 @@ namespace Student_management.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Loi khi tao tai khoan moi");
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, " Error creating account. Rolled back.");
                 throw;
             }
         }
 
         public async Task<AccountDto> EditAccount(int id, CreateAccount dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 var account = await _context.Accounts
@@ -207,10 +355,10 @@ namespace Student_management.Services.Implementations
                     .FirstOrDefaultAsync();
 
                 if (account == null)
-                    throw new KeyNotFoundException($"Tai khoan moi voi ID {id} khong ton tai.");
+                    throw new KeyNotFoundException($"Tai khoan voi ID {id} khong ton tai.");
 
-                var roleExists = await _context.Roles.AnyAsync(r => r.RoleID == dto.RoleID);
-                if (!roleExists)
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleID == dto.RoleID);
+                if (role == null)
                     throw new InvalidOperationException($"Role voi ID {dto.RoleID} khong ton tai.");
 
                 if (!string.IsNullOrEmpty(dto.Email))
@@ -240,9 +388,196 @@ namespace Student_management.Services.Implementations
                 account.FullName = dto.FullName ?? account.FullName;
                 account.PhoneNumber = dto.PhoneNumber ?? account.PhoneNumber;
                 account.UpdatedAt = DateTime.Now;
-                if (dto.CreatedAt != default) account.CreatedAt = dto.CreatedAt;
 
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"✓ Updated Account ID: {account.AccountID}");
+
+                var person = await _context.Persons
+                    .FirstOrDefaultAsync(p => p.Email == account.Email && !p.IsDeleted);
+
+                if (person == null)
+                {
+                    person = new Person
+                    {
+                        PersonType = role.RoleName ?? "Other",
+                        FullName = dto.FullName,
+                        DateOfBirth = dto.DateOfBirth,
+                        Gender = dto.Gender,
+                        Email = dto.Email,
+                        PhoneNumber = dto.PhoneNumber,
+                        Address = dto.Address,
+                        IdentityCard = dto.IdentityCard,
+                        IsDeleted = false,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    _context.Persons.Add(person);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"✓ Created Person ID: {person.PersonID}");
+                }
+                else
+                {
+                    person.PersonType = role.RoleName ?? person.PersonType;
+                    person.FullName = dto.FullName ?? person.FullName;
+                    person.DateOfBirth = dto.DateOfBirth ?? person.DateOfBirth;
+                    person.Gender = dto.Gender ?? person.Gender;
+                    person.PhoneNumber = dto.PhoneNumber ?? person.PhoneNumber;
+                    person.Address = dto.Address ?? person.Address;
+                    person.IdentityCard = dto.IdentityCard ?? person.IdentityCard;
+                    person.UpdatedAt = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"✓ Updated Person ID: {person.PersonID}");
+                }
+
+                var roleName = role.RoleName?.ToLower().Trim();
+                if (roleName == "teacher" || roleName == "giáo viên" || roleName == "gv")
+                {
+                    var teacher = await _context.Teachers
+                        .FirstOrDefaultAsync(t => t.AccountID == account.AccountID && !t.IsDeleted);
+
+                    if (teacher == null)
+                    {
+                        if (!dto.DepartmentID.HasValue)
+                            throw new InvalidOperationException("DepartmentID is required for Teacher role.");
+
+                        var departmentExists = await _context.Departments
+                            .AnyAsync(d => d.DepartmentID == dto.DepartmentID.Value && !d.IsDeleted);
+                        if (!departmentExists)
+                            throw new InvalidOperationException($"Department with ID {dto.DepartmentID} does not exist.");
+
+                        teacher = new Teacher
+                        {
+                            PersonID = person.PersonID,
+                            TeacherCode = await GenerateTeacherCode(),
+                            DepartmentID = dto.DepartmentID.Value,
+                            Position = dto.Position ?? "Giảng viên",
+                            Degree = dto.Degree,
+                            Specialization = dto.Specialization,
+                            AccountID = account.AccountID,
+                            IsDeleted = false,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        };
+                        _context.Teachers.Add(teacher);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($" Created Teacher ID: {teacher.TeacherID}");
+                    }
+                    else
+                    {
+                        if (dto.DepartmentID.HasValue)
+                        {
+                            var departmentExists = await _context.Departments
+                                .AnyAsync(d => d.DepartmentID == dto.DepartmentID.Value && !d.IsDeleted);
+                            if (!departmentExists)
+                                throw new InvalidOperationException($"Department with ID {dto.DepartmentID} does not exist.");
+
+                            teacher.DepartmentID = dto.DepartmentID.Value;
+                        }
+                        teacher.Position = dto.Position ?? teacher.Position;
+                        teacher.Degree = dto.Degree ?? teacher.Degree;
+                        teacher.Specialization = dto.Specialization ?? teacher.Specialization;
+                        teacher.UpdatedAt = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($"Updated Teacher ID: {teacher.TeacherID}");
+                    }
+
+                    var existingStudent = await _context.Students
+                        .FirstOrDefaultAsync(s => s.AccountID == account.AccountID && !s.IsDeleted);
+                    if (existingStudent != null)
+                    {
+                        existingStudent.IsDeleted = true;
+                        existingStudent.UpdatedAt = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($"✓ Soft-deleted Student ID: {existingStudent.StudentID}");
+                    }
+                }
+                else if (roleName == "student" || roleName == "sinh viên" || roleName == "sv")
+                {
+                    var student = await _context.Students
+                        .FirstOrDefaultAsync(s => s.AccountID == account.AccountID && !s.IsDeleted);
+
+                    if (student == null)
+                    {
+                        if (!dto.ClassID.HasValue)
+                            throw new InvalidOperationException("ClassID is required for Student role.");
+
+                        var classExists = await _context.Classes
+                            .AnyAsync(c => c.ClassID == dto.ClassID.Value && !c.IsDeleted);
+                        if (!classExists)
+                            throw new InvalidOperationException($"Class with ID {dto.ClassID} does not exist.");
+
+                        student = new Student
+                        {
+                            PersonID = person.PersonID,
+                            StudentCode = await GenerateStudentCode(),
+                            ClassID = dto.ClassID.Value,
+                            EnrollmentDate = dto.EnrollmentDate ?? DateTime.Now,
+                            Status = StudentStatus.Active,
+                            AccountID = account.AccountID,
+                            IsDeleted = false,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        };
+                        _context.Students.Add(student);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($"✓ Created Student ID: {student.StudentID}");
+                    }
+                    else
+                    {
+                        if (dto.ClassID.HasValue)
+                        {
+                            var classExists = await _context.Classes
+                                .AnyAsync(c => c.ClassID == dto.ClassID.Value && !c.IsDeleted);
+                            if (!classExists)
+                                throw new InvalidOperationException($"Class with ID {dto.ClassID} does not exist.");
+
+                            student.ClassID = dto.ClassID.Value;
+                        }
+                        student.EnrollmentDate = dto.EnrollmentDate ?? student.EnrollmentDate;
+                        student.UpdatedAt = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($"✓ Updated Student ID: {student.StudentID}");
+                    }
+
+                    var existingTeacher = await _context.Teachers
+                        .FirstOrDefaultAsync(t => t.AccountID == account.AccountID && !t.IsDeleted);
+                    if (existingTeacher != null)
+                    {
+                        existingTeacher.IsDeleted = true;
+                        existingTeacher.UpdatedAt = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation($" Soft-deleted Teacher ID: {existingTeacher.TeacherID}");
+                    }
+                }
+                else
+                {
+                    var existingTeacher = await _context.Teachers
+                        .FirstOrDefaultAsync(t => t.AccountID == account.AccountID && !t.IsDeleted);
+                    if (existingTeacher != null)
+                    {
+                        existingTeacher.IsDeleted = true;
+                        existingTeacher.UpdatedAt = DateTime.Now;
+                        _logger.LogInformation($" Soft-deleted Teacher ID: {existingTeacher.TeacherID}");
+                    }
+
+                    var existingStudent = await _context.Students
+                        .FirstOrDefaultAsync(s => s.AccountID == account.AccountID && !s.IsDeleted);
+                    if (existingStudent != null)
+                    {
+                        existingStudent.IsDeleted = true;
+                        existingStudent.UpdatedAt = DateTime.Now;
+                        _logger.LogInformation($" Soft-deleted Student ID: {existingStudent.StudentID}");
+                    }
+
+                    if (existingTeacher != null || existingStudent != null)
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                await transaction.CommitAsync();
+                _logger.LogInformation($"Successfully updated account ID: {account.AccountID}");
+
                 var accountWithRole = await _context.Accounts
                     .Include(a => a.Role)
                     .FirstAsync(a => a.AccountID == account.AccountID);
@@ -251,7 +586,8 @@ namespace Student_management.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Loi khi sua tai khoan ID: {AccountId}", id);
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "❌ Error updating account ID: {AccountId}. Rolled back.", id);
                 throw;
             }
         }
@@ -307,7 +643,6 @@ namespace Student_management.Services.Implementations
                     .Take(searchParams.PageSize)
                     .ToListAsync();
 
-                // AutoMapper
                 var accountDtos = _mapper.Map<List<AccountDto>>(accounts);
 
                 var totalPages = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
@@ -359,6 +694,49 @@ namespace Student_management.Services.Implementations
         public Task<List<PermissionDto>> GetAllPermissions(string? module = null)
         {
             throw new NotImplementedException();
+        }
+        private async Task<string> GenerateTeacherCode()
+        {
+            var currentYear = DateTime.Now.Year;
+
+            var lastTeacher = await _context.Teachers
+                .Where(t => !t.IsDeleted && t.TeacherCode.StartsWith($"GV{currentYear}"))
+                .OrderByDescending(t => t.TeacherCode)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+            if (lastTeacher != null && !string.IsNullOrEmpty(lastTeacher.TeacherCode))
+            {
+                var numberPart = lastTeacher.TeacherCode.Substring(6); 
+                if (int.TryParse(numberPart, out int number))
+                {
+                    nextNumber = number + 1;
+                }
+            }
+
+            return $"GV{currentYear}{nextNumber:D3}"; 
+        }
+
+        private async Task<string> GenerateStudentCode()
+        {
+            var currentYear = DateTime.Now.Year;
+
+            var lastStudent = await _context.Students
+                .Where(s => !s.IsDeleted && s.StudentCode.StartsWith($"SV{currentYear}"))
+                .OrderByDescending(s => s.StudentCode)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+            if (lastStudent != null && !string.IsNullOrEmpty(lastStudent.StudentCode))
+            {
+                var numberPart = lastStudent.StudentCode.Substring(6); 
+                if (int.TryParse(numberPart, out int number))
+                {
+                    nextNumber = number + 1;
+                }
+            }
+
+            return $"SV{currentYear}{nextNumber:D3}"; 
         }
     }
 }

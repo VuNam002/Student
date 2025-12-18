@@ -262,59 +262,90 @@ namespace Student_management.Services.Implementations
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var classExists = await _context.Classes
-                    .AnyAsync(c => c.ClassID == classId && !c.IsDeleted);
-                if(!classExists)
+                // Validate class exists
+                var classEntity = await _context.Classes
+                    .Where(c => c.ClassID == classId && !c.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (classEntity == null)
                 {
-                    throw new KeyNotFoundException($"Class with Id {classId} not found. ");
+                    throw new KeyNotFoundException($"Class with ID {classId} not found.");
                 }
+
+                // Validate students exist
                 var students = await _context.Students
                     .Where(s => studentIds.Contains(s.StudentID) && !s.IsDeleted)
                     .ToListAsync();
-                if(students.Count!= studentIds.Count)
+
+                if (students.Count != studentIds.Count)
                 {
-                    throw new InvalidOperationException("Mot so sinh vien khong ton tai");
+                    var foundIds = students.Select(s => s.StudentID).ToList();
+                    var missingIds = studentIds.Except(foundIds).ToList();
+                    throw new InvalidOperationException($"Không tìm thấy sinh viên với ID: {string.Join(", ", missingIds)}");
                 }
 
                 var addedCount = 0;
                 var failedStudents = new List<string>();
-                foreach(var student in students)
+
+                foreach (var student in students)
                 {
-                    if (student.ClassID != null && student.ClassID > 0)
+                    if (student.ClassID.HasValue && student.ClassID.Value > 0)
                     {
-                        failedStudents.Add($"Sinh vien {student.StudentCode} da thuoc lop khac");
+                        if (student.ClassID == classId)
+                        {
+                            failedStudents.Add($"Sinh viên {student.StudentCode} đã ở trong lớp này");
+                        }
+                        else
+                        {
+                            failedStudents.Add($"Sinh viên {student.StudentCode} đã thuộc lớp khác (ClassID: {student.ClassID})");
+                        }
                         continue;
                     }
+
                     student.ClassID = classId;
                     student.UpdatedAt = DateTime.UtcNow;
                     addedCount++;
                 }
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
 
-                _logger.LogInformation("Added {Count} students to class {ClassId}", addedCount, classId);
+                if (addedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("Added {Count} students to class {ClassId}", addedCount, classId);
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogWarning("No students were added to class {ClassId}", classId);
+                }
 
                 return new AddStudentsToClassResponse
                 {
-                    Message = failedStudents.Any()
-                        ? $"Thêm {addedCount} sinh viên thành công. {failedStudents.Count} sinh viên thất bại."
-                        : $"Thêm {addedCount} sinh viên thành công",
+                    Message = addedCount > 0
+                        ? (failedStudents.Any()
+                            ? $"Thêm {addedCount} sinh viên thành công. {failedStudents.Count} sinh viên thất bại."
+                            : $"Thêm {addedCount} sinh viên thành công.")
+                        : "Không có sinh viên nào được thêm vào lớp.",
                     AddedCount = addedCount,
                     FailedStudents = failedStudents
                 };
-            } catch (KeyNotFoundException)
+            }
+            catch (KeyNotFoundException)
             {
                 await transaction.RollbackAsync();
                 throw;
-            } catch(InvalidOperationException)
+            }
+            catch (InvalidOperationException)
             {
                 await transaction.RollbackAsync();
                 throw;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "An error occurred while adding students to class {ClassId}", classId);
-                throw new Exception("Co loi nay ra khi them sinh vien vao lop");
+                throw new Exception("Có lỗi xảy ra khi thêm sinh viên vào lớp", ex);
             }
         }
 
@@ -325,15 +356,21 @@ namespace Student_management.Services.Implementations
             try
             {
                 var student = await _context.Students
-                    .FirstOrDefaultAsync(s => s.StudentID == studentId &&
-                                               s.ClassID == classId &&
-                                               !s.IsDeleted);
-                if(student == null)
+                    .FirstOrDefaultAsync(s => s.StudentID == studentId && !s.IsDeleted);
+
+                if (student == null)
                 {
-                    throw new KeyNotFoundException("Khong tim thay sinh vien trong lop nay");
+                    throw new KeyNotFoundException($"Không tìm thấy sinh viên với ID {studentId}");
                 }
-                student.ClassID = 0;
+
+                if (!student.ClassID.HasValue || student.ClassID != classId)
+                {
+                    throw new InvalidOperationException($"Sinh viên {student.StudentCode} không thuộc lớp này");
+                }
+
+                student.ClassID = null; 
                 student.UpdatedAt = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -341,19 +378,101 @@ namespace Student_management.Services.Implementations
 
                 return new RemoveStudentFromClassResponse
                 {
-                    Message = "Xoa sinh vien thanh cong",
+                    Message = "Xóa sinh viên thành công",
                     StudentId = studentId,
-                    StudentCode = student.StudentCode
+                    StudentCode = student.StudentCode ?? ""
                 };
-            } catch (KeyNotFoundException)
+            }
+            catch (KeyNotFoundException)
             {
                 await transaction.RollbackAsync();
                 throw;
-            } catch (Exception ex)
+            }
+            catch (InvalidOperationException)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "An error occurred while removing student {StudentId} from class {ClassId}", studentId, classId);
-                throw new Exception("Loi khi xoa sinh vien ra khoi lop");
+                throw new Exception("Lỗi khi xóa sinh viên ra khỏi lớp", ex);
+            }
+        }
+        //Chuyển sinh viên sang lớp khác
+        public async Task<TransferStudentResponse> TransferStudentToClass(int studentId, int newClassId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var student = await _context.Students
+                    .Include(s => s.Person)
+                    .Include(s => s.Class)
+                    .FirstOrDefaultAsync(s => s.StudentID == studentId && !s.IsDeleted);
+
+                if (student == null)
+                {
+                    throw new KeyNotFoundException($"Khong tim thay sinh vien voi ID {studentId}");
+                }
+
+                var newClass = await _context.Classes
+                    .FirstOrDefaultAsync(c => c.ClassID == newClassId && !c.IsDeleted);
+
+                if (newClass == null)
+                {
+                    throw new KeyNotFoundException($"Khong tim thay lop voi ID {newClassId}");
+                }
+                if (student.ClassID == newClassId)
+                {
+                    throw new InvalidOperationException($"Sinh vien {student.StudentCode} da o trong lop {newClass.ClassName} roi");
+                }
+                var oldClassId = student.ClassID;
+                var oldClassName = student.Class?.ClassName;
+
+                student.ClassID = newClassId;
+                student.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation(
+                    "Transferred student {StudentCode} (ID: {StudentId}) from class {OldClass} to class {NewClass}",
+                    student.StudentCode,
+                    studentId,
+                    oldClassName ?? "Chua co lop",
+                    newClass.ClassName
+                );
+
+                return new TransferStudentResponse
+                {
+                    Message = oldClassId.HasValue
+                        ? $"Chuyen sinh vien tu lop {oldClassName} sang lớp {newClass.ClassName}"
+                        : $"Them moi sinh vien vao lop {newClass.ClassName} thanh cong",
+                    StudentId = studentId,
+                    StudentCode = student.StudentCode ?? "",
+                    StudentName = student.Person?.FullName ?? "",
+                    OldClassId = oldClassId,
+                    OldClassName = oldClassName,
+                    NewClassId = newClassId,
+                    NewClassName = newClass.ClassName ?? ""
+                };
+            }
+            catch (KeyNotFoundException)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error transferring student {StudentId} to class {NewClassId}", studentId, newClassId);
+                throw new Exception("loi khi chuyen lop cho sinh vien", ex);
             }
         }
     }

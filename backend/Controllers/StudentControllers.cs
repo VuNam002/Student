@@ -132,5 +132,26 @@ namespace Student_management.Controllers
             var result = await _studentService.RemoveStudentFromClass(classId, studentId);
             return Ok(result);
         }
+        [HttpPut("{studentId}/transfer-class/{newClassId}")]
+        public async Task<IActionResult> TransferStudentToClass(int studentId, int newClassId)
+        {
+            try
+            {
+                var result = await _studentService.TransferStudentToClass(studentId, newClassId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Có lỗi xảy ra khi chuyển lớp" });
+            }
+        }
     }
 }

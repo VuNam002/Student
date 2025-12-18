@@ -16,7 +16,7 @@ namespace Student_management.Mappings
             CreateMap<CreateAccount, Account>()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email != null ? src.Email.Trim() : null))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (byte)AccountStatus.Active))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt != default ? src.CreatedAt : DateTime.Now))
+             
                 .ForMember(dest => dest.Password, opt => opt.Ignore())
                 .ForMember(dest => dest.AccountID, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false))

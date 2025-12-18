@@ -10,7 +10,7 @@ using Student_management.Validators;
 using Student_management.Middlewares;
 using System.Text;
 using Serilog;
-using OfficeOpenXml; // ← THÊM DÒNG NÀY
+using OfficeOpenXml; 
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -79,6 +79,8 @@ try
     builder.Services.AddScoped<IRoleService, RoleService>();
     builder.Services.AddScoped<IStudentService, StudentService>();
     builder.Services.AddScoped<IClassService, ClassService>();
+    builder.Services.AddScoped<ITeacherService, TeacherService>();
+    builder.Services.AddScoped<IDeapartmentService, DepartmentService>();
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>

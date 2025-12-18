@@ -20,7 +20,7 @@ namespace Student_management.Models.Entities
         [StringLength(10)]
         public string StudentCode { get; set; } = string.Empty;
 
-        public int ClassID { get; set; }
+        public int? ClassID { get; set; }
 
         [Column(TypeName = "date")]
         public DateTime? EnrollmentDate { get; set; }

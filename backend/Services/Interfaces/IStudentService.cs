@@ -16,5 +16,7 @@ namespace Student_management.Services.Interfaces
         Task<StudentListResponse> GetStudentsByClass(int classId);
         Task<AddStudentsToClassResponse> AddStudentsToClass(int classId, List<int> studentIds);
         Task<RemoveStudentFromClassResponse> RemoveStudentFromClass(int classId, int studentId);
+        Task<TransferStudentResponse> TransferStudentToClass(int studentId, int newClassId);
+
     }
 }
