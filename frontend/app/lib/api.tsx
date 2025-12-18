@@ -190,7 +190,7 @@ export async function fetchAccountStatus(id: number, Status: number) {
   try {
     const response = await api<any>(`${API_URL}/Account/${id}/status`, {
       method: "PATCH",
-      body: JSON.stringify(Status),
+       body: JSON.stringify({ Status }),
     });
     return response?.data || response;
   } catch (error) {
